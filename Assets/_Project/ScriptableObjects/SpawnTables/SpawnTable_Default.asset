@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3df2d11f0f826bc4c8ce929d7bcd0952, type: 3}
+  m_Name: SpawnTable_Default
+  m_EditorClassIdentifier: 
+  entries:
+  - fruit: {fileID: 11400000, guid: 6115bc36463616e479a58278b2afc3cc, type: 2}
+    weight: 7
+  - fruit: {fileID: 11400000, guid: 32174b16232c02e47878263717deb7f9, type: 2}
+    weight: 10
+  - fruit: {fileID: 11400000, guid: e38fc9026c60c23499d6681a8a884158, type: 2}
+    weight: 1
+  - fruit: {fileID: 11400000, guid: e4542cc3fcf20b240ae8c23463d0b0fb, type: 2}
+    weight: 1
+  - fruit: {fileID: 11400000, guid: e501cfd49fb878344a9123227f57a1fe, type: 2}
+    weight: 1
+  - fruit: {fileID: 11400000, guid: 3003af0a5142b254eb3ec03232230d6a, type: 2}
+    weight: 1
+  - fruit: {fileID: 11400000, guid: 1574c991311c73f4ab87400fdd7fa5bc, type: 2}
+    weight: 1
+  - fruit: {fileID: 11400000, guid: 5b6820f6048d9d84e9224dd098e64d15, type: 2}
+    weight: 3
+  - fruit: {fileID: 11400000, guid: ab6acfe372c8faf49bc825b2d2233ecc, type: 2}
+    weight: 2
+  initialInterval: 1
+  intervalDecay: 0.97
+  minInterval: 0.35
+  fallSpeedMultiplier: 1

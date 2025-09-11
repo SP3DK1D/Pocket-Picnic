@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66ce5d6af6fe2d14c9f6ba60bb453a0d, type: 3}
+  m_Name: GameConfig_Default
+  m_EditorClassIdentifier: 
+  startingLives: 5
+  arenaHalfWidth: 3
+  spawnY: 1
+  groundY: -7
+  playerMoveSpeed: 10
+  useSessionTimer: 1
+  sessionDuration: 60
+  verboseLogs: 1

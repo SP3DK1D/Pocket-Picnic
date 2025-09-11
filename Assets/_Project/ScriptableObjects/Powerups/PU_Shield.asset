@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2bf4a18734c60cf458ecbe64896c4af8, type: 3}
+  m_Name: PU_Shield
+  m_EditorClassIdentifier: 
+  id: PU_Shield
+  kind: 2
+  overlapPolicy: 0
+  duration: 4
+  icon: {fileID: 3138550945092001932, guid: 62ce727eadf0b1d48b5cc677ee633856, type: 3}
+  overlayColor: {r: 0.5, g: 0.8, b: 1, a: 1}
+  overlayAlpha: 0.35
+  overlayFade: 0.15
+  timeScale: 0.2
+  scoreMultiplier: 2
+  magnetRadius: 3
+  magnetPullSpeed: 7

@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cc1fdb8dba6d4a4b93053c492bf5a1a, type: 3}
+  m_Name: FD_ScoreX2
+  m_EditorClassIdentifier: 
+  id: ScoreX2
+  sprite: {fileID: -1643791116833079571, guid: accb679a8a3d6af4a80383a8c6c7a2ae, type: 3}
+  tint: {r: 1, g: 1, b: 1, a: 1}
+  scoreValue: 1
+  minFallSpeed: 2
+  maxFallSpeed: 5
+  weight: 0.5
+  isBomb: 0
+  powerup: {fileID: 11400000, guid: c1fe0b500fbe30f4d80d0b7eb659116c, type: 2}
