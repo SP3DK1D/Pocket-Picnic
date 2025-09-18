@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FD_Apple
   m_EditorClassIdentifier: 
   id: Apple
-  sprite: {fileID: -7278443111435913928, guid: 7b0438f5e8372794d8bbe01b09f86b67, type: 3}
+  sprite: {fileID: -1533907723351953366, guid: 0a28d827fb4dbba4d815aebe30533121, type: 3}
   tint: {r: 1, g: 1, b: 1, a: 1}
   scoreValue: 1
   minFallSpeed: 2

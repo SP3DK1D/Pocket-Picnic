@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FD_Bomb
   m_EditorClassIdentifier: 
   id: Bomb
-  sprite: {fileID: -1568754238684435599, guid: c681908e6da0de943bce64921d773fb1, type: 3}
+  sprite: {fileID: -6965994421082366142, guid: 23b9c2cb9147b114c8a743053e071cb9, type: 3}
   tint: {r: 1, g: 1, b: 1, a: 1}
   scoreValue: 1
   minFallSpeed: 2

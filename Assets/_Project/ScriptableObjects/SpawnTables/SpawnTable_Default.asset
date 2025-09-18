@@ -18,20 +18,20 @@ MonoBehaviour:
   - fruit: {fileID: 11400000, guid: 32174b16232c02e47878263717deb7f9, type: 2}
     weight: 10
   - fruit: {fileID: 11400000, guid: e38fc9026c60c23499d6681a8a884158, type: 2}
-    weight: 1
+    weight: 0.5
   - fruit: {fileID: 11400000, guid: e4542cc3fcf20b240ae8c23463d0b0fb, type: 2}
-    weight: 1
+    weight: 0.5
   - fruit: {fileID: 11400000, guid: e501cfd49fb878344a9123227f57a1fe, type: 2}
-    weight: 1
+    weight: 0.5
   - fruit: {fileID: 11400000, guid: 3003af0a5142b254eb3ec03232230d6a, type: 2}
-    weight: 1
+    weight: 0.5
   - fruit: {fileID: 11400000, guid: 1574c991311c73f4ab87400fdd7fa5bc, type: 2}
-    weight: 1
+    weight: 0.2
   - fruit: {fileID: 11400000, guid: 5b6820f6048d9d84e9224dd098e64d15, type: 2}
-    weight: 3
+    weight: 1
   - fruit: {fileID: 11400000, guid: ab6acfe372c8faf49bc825b2d2233ecc, type: 2}
     weight: 2
   initialInterval: 1
   intervalDecay: 0.97
   minInterval: 0.35
-  fallSpeedMultiplier: 1
+  fallSpeedMultiplier: 0.1

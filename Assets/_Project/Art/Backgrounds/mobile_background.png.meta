@@ -1,13 +1,10 @@
 fileFormatVersion: 2
-guid: c681908e6da0de943bce64921d773fb1
+guid: 0d0e1765016cf6246b516c0b97ba4980
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1568754238684435599
-    second: pngtree-cartoon-bomb-vector-illustration-png-image_6575499_0
-  - first:
-      213: 7191647109415908923
-    second: pngtree-cartoon-bomb-vector-illustration-png-image_6575499_1
+      213: 6430509900514165720
+    second: mobile_background_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -129,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: pngtree-cartoon-bomb-vector-illustration-png-image_6575499_0
+      name: mobile_background_0
       rect:
         serializedVersion: 2
-        x: 109
-        y: 73
-        width: 148
-        height: 258
+        x: 0
+        y: 0
+        width: 1080
+        height: 1920
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -144,30 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 17b635fd45aaa3ae0800000000000000
-      internalID: -1568754238684435599
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: pngtree-cartoon-bomb-vector-illustration-png-image_6575499_1
-      rect:
-        serializedVersion: 2
-        x: 107
-        y: 31
-        width: 146
-        height: 30
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b3633ba61fcddc360800000000000000
-      internalID: 7191647109415908923
+      spriteID: 8d387c82fa2cd3950800000000000000
+      internalID: 6430509900514165720
       vertices: []
       indices: 
       edges: []
@@ -186,8 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      pngtree-cartoon-bomb-vector-illustration-png-image_6575499_0: -1568754238684435599
-      pngtree-cartoon-bomb-vector-illustration-png-image_6575499_1: 7191647109415908923
+      mobile_background_0: 6430509900514165720
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

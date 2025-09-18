@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FD_ScoreX2
   m_EditorClassIdentifier: 
   id: ScoreX2
-  sprite: {fileID: -1643791116833079571, guid: accb679a8a3d6af4a80383a8c6c7a2ae, type: 3}
+  sprite: {fileID: -6883523635056330865, guid: 518868c10f01af048b026693b7329464, type: 3}
   tint: {r: 1, g: 1, b: 1, a: 1}
   scoreValue: 1
   minFallSpeed: 2

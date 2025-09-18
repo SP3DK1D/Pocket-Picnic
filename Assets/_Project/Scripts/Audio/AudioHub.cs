@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class AudioHub : MonoBehaviour
 {
@@ -8,21 +8,17 @@ public class AudioHub : MonoBehaviour
     public AudioClip backgroundLoop;
 
     [Header("SFX Clips")]
-    public AudioClip pickup;
-    public AudioClip bomb;
-    public AudioClip button;
-    public AudioClip freezeOn;
-    public AudioClip freezeOff;
-    public AudioClip shieldOn;
-    public AudioClip shieldHit;
+    public AudioClip pickup, bomb, button;
+    public AudioClip freezeOn, freezeOff;
+    public AudioClip shieldOn, shieldHit;
     public AudioClip clear;
+    public AudioClip magnet;   // NEW
 
-    [Header("Volumes (0..1)")]
     [Range(0f, 1f)] public float sfxVolume = 1f;
     [Range(0f, 1f)] public float musicVolume = 1f;
 
-    private AudioSource sfxSource;
-    private AudioSource musicSource;
+    private AudioSource sfx;
+    private AudioSource music;
 
     void Awake()
     {
@@ -31,10 +27,22 @@ public class AudioHub : MonoBehaviour
         DontDestroyOnLoad(gameObject);
 
         EnsureListener();
-        sfxSource = MakeSource("SFX", loop: false);
-        musicSource = MakeSource("Music", loop: true);
+        sfx = MakeSrc("SFX", loop: false);
+        music = MakeSrc("Music", loop: true);
 
         if (backgroundLoop) StartMusic();
+    }
+
+    private AudioSource MakeSrc(string n, bool loop)
+    {
+        var go = new GameObject(n);
+        go.transform.SetParent(transform, false);
+        var a = go.AddComponent<AudioSource>();
+        a.playOnAwake = false;
+        a.loop = loop;
+        a.spatialBlend = 0f; // 2D
+        a.volume = loop ? musicVolume : sfxVolume;
+        return a;
     }
 
     private void EnsureListener()
@@ -46,48 +54,45 @@ public class AudioHub : MonoBehaviour
         }
     }
 
-    private AudioSource MakeSource(string name, bool loop)
-    {
-        var go = new GameObject(name);
-        go.transform.SetParent(transform, false);
-        var a = go.AddComponent<AudioSource>();
-        a.loop = loop;
-        a.playOnAwake = false;
-        a.spatialBlend = 0f; // 2D
-        a.volume = loop ? musicVolume : sfxVolume;
-        return a;
-    }
-
-    // ---------- Public API ----------
-    public void PlayPickup() => PlaySFX(pickup);
-    public void PlayBomb() => PlaySFX(bomb);
-    public void PlayButton() => PlaySFX(button);
-    public void PlayFreezeOn() => PlaySFX(freezeOn);
-    public void PlayFreezeOff() => PlaySFX(freezeOff);
-    public void PlayShieldOn() => PlaySFX(shieldOn);
-    public void PlayShieldHit() => PlaySFX(shieldHit);
-    public void PlayClear() => PlaySFX(clear);
+    // ---- Public helpers ----
+    public void PlayPickup() => Play(pickup);
+    public void PlayBomb() => Play(bomb);
+    public void PlayButton() => Play(button);
+    public void PlayFreezeOn() => Play(freezeOn);
+    public void PlayFreezeOff() => Play(freezeOff);
+    public void PlayShieldOn() => Play(shieldOn);
+    public void PlayShieldHit() => Play(shieldHit);
+    public void PlayClear() => Play(clear);
+    public void PlayMagnet() => Play(magnet);   // NEW
 
     public void StartMusic(AudioClip loop = null)
     {
         if (loop) backgroundLoop = loop;
         if (!backgroundLoop) return;
-        musicSource.clip = backgroundLoop;
-        musicSource.volume = musicVolume;
-        musicSource.Play();
+        music.clip = backgroundLoop;
+        music.volume = musicVolume;
+        music.Play();
     }
-    public void StopMusic() => musicSource.Stop();
 
-    public void SetSfxVolume(float v) { sfxVolume = Mathf.Clamp01(v); }
-    public void SetMusicVolume(float v) { musicVolume = Mathf.Clamp01(v); musicSource.volume = musicVolume; }
+    public void StopMusic() => music.Stop();
 
-    // ---------- Internals ----------
-    private void PlaySFX(AudioClip clip, float volumeMul = 1f, float pitch = 1f)
+    public void SetSfxVolume(float v)
+    {
+        sfxVolume = Mathf.Clamp01(v);
+    }
+
+    public void SetMusicVolume(float v)
+    {
+        musicVolume = Mathf.Clamp01(v);   // ✅ fixed
+        if (music) music.volume = musicVolume;
+    }
+
+    private void Play(AudioClip clip, float volMul = 1f, float pitch = 1f)
     {
         if (!clip) return;
-        float oldPitch = sfxSource.pitch;
-        sfxSource.pitch = Mathf.Clamp(pitch, 0.5f, 2f);
-        sfxSource.PlayOneShot(clip, Mathf.Clamp01(sfxVolume * volumeMul));
-        sfxSource.pitch = oldPitch;
+        float old = sfx.pitch;
+        sfx.pitch = Mathf.Clamp(pitch, 0.5f, 2f);
+        sfx.PlayOneShot(clip, Mathf.Clamp01(sfxVolume * volMul));
+        sfx.pitch = old;
     }
 }

@@ -15,7 +15,7 @@ MonoBehaviour:
   id: PU_Shield
   kind: 2
   overlapPolicy: 0
-  duration: 4
+  duration: 10
   icon: {fileID: 3138550945092001932, guid: 62ce727eadf0b1d48b5cc677ee633856, type: 3}
   overlayColor: {r: 0.5, g: 0.8, b: 1, a: 1}
   overlayAlpha: 0.35

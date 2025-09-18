@@ -6,93 +6,150 @@ using UnityEngine.InputSystem;
 namespace CatchTheFruit
 {
     /// <summary>
-    /// Follows the pointer X. Default = Snap (instant, no lag).
-    /// Smooth mode is available if you ever want easing.
-    /// Uses unscaled time so freeze power-up does NOT slow the player.
+    /// Mobile-friendly basket mover.
+    /// - Reads touch/mouse X, clamps to arena, and moves a Rigidbody2D.
+    /// - Snap: teleports under pointer. Smooth: eased with speed (unscaled).
+    /// - Uses FixedUpdate + MovePosition for reliable trigger hits.
+    /// - No collider requirement (so you can use a child CatchZone).
     /// </summary>
-    [RequireComponent(typeof(Collider2D))]
+    [DisallowMultipleComponent]
+    [RequireComponent(typeof(Rigidbody2D))]
     public class PlayerMover : MonoBehaviour
     {
         [SerializeField] private GameConfig config;
 
         public enum FollowMode { Snap, Smooth }
+
         [Header("Follow")]
         [SerializeField] private FollowMode follow = FollowMode.Snap;
 
         [Tooltip("Used only in Smooth mode: world-units/second toward the pointer.")]
-        [Min(0f)] public float smoothSpeed = 12f; // fallback if config is missing
+        [Min(0f)] public float smoothSpeed = 20f;   // good for mobile
 
-        private Camera _cam;
+        [Header("Input")]
+        [Tooltip("If true, you must be actively touching/holding to move. If false, will follow last known pointer position.")]
+        public bool requirePress = true;
 
-        private void Awake()
+        Rigidbody2D _rb;
+        Camera _cam;
+
+        // Target x computed in Update, applied in FixedUpdate
+        float _targetX;
+        bool _hasTarget;
+
+        void Awake()
         {
+            _rb = GetComponent<Rigidbody2D>();
+            _rb.isKinematic = true;              // kinematic for MovePosition control
+            _rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+
             _cam = Camera.main;
             if (!_cam) Debug.LogError("[PlayerMover] Main Camera not found (tag your camera 'MainCamera').");
-            if (!config) Debug.LogWarning("[PlayerMover] GameConfig not assigned (will use local smoothSpeed).");
+            if (!config) Debug.LogWarning("[PlayerMover] GameConfig not assigned (will clamp using current camera only).");
         }
 
-        private void Update()
+        void OnEnable()
+        {
+            // Initialize target to current position so Smooth doesn't jump on first frame
+            _targetX = transform.position.x;
+            _hasTarget = true;
+        }
+
+        void Update()
         {
             if (!_cam) return;
 
-            // Get current pointer (mouse or touch) X in SCREEN space
-            if (!TryGetPointerScreenX(out float screenX)) return;
+            // Read input each frame (unscaled time behavior is handled in movement step)
+            if (TryGetPointerScreenX(requirePress, out float screenX))
+            {
+                float worldX = ScreenToWorldX(screenX);
+                _targetX = (config != null)
+                    ? Mathf.Clamp(worldX, -config.arenaHalfWidth, config.arenaHalfWidth)
+                    : worldX;
+                _hasTarget = true;
+            }
+            else if (!requirePress)
+            {
+                // No new input but we keep the last target (follow stays active)
+                _hasTarget = true;
+            }
+            else
+            {
+                // Requiring press and none present -> no movement update
+                _hasTarget = false;
+            }
+        }
 
-            // Convert to WORLD X and clamp to arena
-            float worldX = ScreenToWorldX(screenX);
-            float clampedX = (config != null)
-                ? Mathf.Clamp(worldX, -config.arenaHalfWidth, config.arenaHalfWidth)
-                : worldX;
+        void FixedUpdate()
+        {
+            if (!_hasTarget) return;
 
-            // Apply movement
-            Vector3 p = transform.position;
+            Vector2 p = _rb.position;
 
             if (follow == FollowMode.Snap)
             {
-                // Instant: stick directly under pointer (no lag)
-                p.x = clampedX;
+                p.x = _targetX;
             }
-            else // Smooth
+            else
             {
-                float speed = (config ? config.playerMoveSpeed : smoothSpeed);
-                // Use unscaled time so power-ups that change Time.timeScale don't affect player feel
-                p.x = Mathf.MoveTowards(p.x, clampedX, speed * Time.unscaledDeltaTime);
+                // Smooth toward target using unscaled time so Freeze/TimeScale don't affect feel
+                float step = (config ? config.playerMoveSpeed : smoothSpeed) * Time.unscaledDeltaTime;
+                p.x = Mathf.MoveTowards(p.x, _targetX, step);
             }
 
-            transform.position = p;
+            _rb.MovePosition(p);
         }
 
-        private float ScreenToWorldX(float screenX)
+        float ScreenToWorldX(float screenX)
         {
-            // We only care about X; use camera distance on Z so ScreenToWorldPoint works in 2D
-            Vector3 pt = new Vector3(screenX, 0f, -_cam.transform.position.z);
+            // Convert a screen X to world X at z-plane of the player relative to camera
+            float z = -_cam.transform.position.z; // camera is usually at -10
+            Vector3 pt = new Vector3(screenX, 0f, z);
             return _cam.ScreenToWorldPoint(pt).x;
         }
 
-        private bool TryGetPointerScreenX(out float screenX)
+        bool TryGetPointerScreenX(bool mustBePressed, out float screenX)
         {
-            // Default behavior: move while pressed (touch or LMB). 
-            // If you want movement even when not pressed, you can return last known X instead.
 #if ENABLE_INPUT_SYSTEM
             // Touch has priority
-            if (Touchscreen.current?.primaryTouch.press.isPressed == true)
+            var touch = Touchscreen.current?.primaryTouch;
+            if (touch != null)
             {
-                screenX = Touchscreen.current.primaryTouch.position.ReadValue().x;
-                return true;
+                bool pressed = touch.press.isPressed;
+                if (!mustBePressed || pressed)
+                {
+                    if (pressed || !mustBePressed)
+                    {
+                        screenX = touch.position.ReadValue().x;
+                        return true;
+                    }
+                }
             }
-            // Mouse fallback
-            if (Mouse.current?.leftButton.isPressed == true)
+
+            // Mouse fallback (useful in editor)
+            var mouse = Mouse.current;
+            if (mouse != null)
             {
-                screenX = Mouse.current.position.ReadValue().x;
-                return true;
+                bool pressed = mouse.leftButton.isPressed;
+                if (!mustBePressed || pressed)
+                {
+                    screenX = mouse.position.ReadValue().x;
+                    return true;
+                }
             }
 #else
+            // Legacy Input
             if (Input.touchSupported && Input.touchCount > 0)
             {
-                screenX = Input.GetTouch(0).position.x;
-                return true;
+                var t = Input.GetTouch(0);
+                if (!mustBePressed || t.phase != TouchPhase.Ended)
+                {
+                    screenX = t.position.x;
+                    return true;
+                }
             }
-            if (Input.GetMouseButton(0))
+
+            if (!mustBePressed || Input.GetMouseButton(0))
             {
                 screenX = Input.mousePosition.x;
                 return true;
@@ -103,13 +160,3 @@ namespace CatchTheFruit
         }
     }
 }
-/*
-How to implement in Unity:
-1) Replace your existing PlayerMover.cs with this file and let Unity recompile.
-2) Select the Player object → make sure it has:
-   - Tag = Player
-   - BoxCollider2D (IsTrigger = ON)
-   - PlayerMover (this script) and the GameConfig assigned (recommended).
-3) Test: Hold LMB in Game view (or touch on device) — the player should now "stick" instantly under the pointer.
-   - If you ever want easing, set Follow = Smooth in the Inspector.
-*/

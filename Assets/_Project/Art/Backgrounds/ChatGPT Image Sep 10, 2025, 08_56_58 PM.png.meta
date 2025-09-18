@@ -1,13 +1,10 @@
 fileFormatVersion: 2
-guid: accb679a8a3d6af4a80383a8c6c7a2ae
+guid: 1049b1a7e8e82614ca1efc023a6c2356
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3736290689451732685
-    second: istockphoto-1417268071-612x612-Photoroom_0
-  - first:
-      213: -1643791116833079571
-    second: istockphoto-1417268071-612x612-Photoroom_1
+      213: 6455498633843261100
+    second: ChatGPT Image Sep 10, 2025, 08_56_58 PM_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -49,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -129,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: istockphoto-1417268071-612x612-Photoroom_0
+      name: ChatGPT Image Sep 10, 2025, 08_56_58 PM_0
       rect:
         serializedVersion: 2
-        x: 89
-        y: 186
-        width: 172
-        height: 171
+        x: 0
+        y: 0
+        width: 1536
+        height: 1024
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -144,30 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 33151a5e967062cc0800000000000000
-      internalID: -3736290689451732685
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: istockphoto-1417268071-612x612-Photoroom_1
-      rect:
-        serializedVersion: 2
-        x: 247
-        y: 137
-        width: 236
-        height: 330
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: deeb83c30b41039e0800000000000000
-      internalID: -1643791116833079571
+      spriteID: cae3f360ec9869950800000000000000
+      internalID: 6455498633843261100
       vertices: []
       indices: 
       edges: []
@@ -176,7 +151,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -186,8 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      istockphoto-1417268071-612x612-Photoroom_0: -3736290689451732685
-      istockphoto-1417268071-612x612-Photoroom_1: -1643791116833079571
+      ChatGPT Image Sep 10, 2025, 08_56_58 PM_0: 6455498633843261100
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -11,7 +11,7 @@ namespace CatchTheFruit
         public TMP_Text scoreText;       // e.g., TXT_Score
         public TMP_Text scoreDeltaText;  // e.g., TXT_ScoreDelta (optional)
 
-        public Color normalColor = Color.white;
+        public Color normalColor = Color.black;
         public Color x2Color = new Color(1f, 0.84f, 0.1f); // gold
 
         bool _active;

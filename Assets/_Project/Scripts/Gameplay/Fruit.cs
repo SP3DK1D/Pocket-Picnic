@@ -1,76 +1,144 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-// Alias Unity's Random to avoid clashes with System.Random
 using URandom = UnityEngine.Random;
 
 namespace CatchTheFruit
 {
     [RequireComponent(typeof(SpriteRenderer))]
-    [RequireComponent(typeof(Collider2D))]
     [RequireComponent(typeof(Rigidbody2D))]
+    [RequireComponent(typeof(Collider2D))]
     public class Fruit : MonoBehaviour
     {
-        /// <summary>Global registry of active fruits (fast ClearScreen / pooling-friendly).</summary>
         public static readonly HashSet<Fruit> Active = new();
 
         [Header("Runtime (assigned by spawner)")]
-        public FruitData data;      // what this fruit is
-        public float fallSpeed; // world units per second
+        public FruitData data;
+        public float fallSpeed; // legacy/debug only
+
+        [Header("Physics Feel")]
+        [Min(0f)] public float initialDownBoost = 0f;
+        [Min(0f)] public float maxFallSpeed = 10f;
+        [Min(0f)] public float gravityScaleOverride = 0f;
+
+        [Header("Tumbling (randomized per instance)")]
+        [Tooltip("Angular velocity range (deg/sec). A random value in this range is chosen.")]
+        public Vector2 angularVelRange = new Vector2(80f, 220f);
+
+        [Tooltip("Extra impulse torque range (N·m). Adds a one-time twist at spawn.")]
+        public Vector2 torqueImpulseRange = new Vector2(0.02f, 0.08f);
+
+        [Tooltip("Per-instance angular drag range. Higher = spin slows down sooner.")]
+        public Vector2 angularDragRange = new Vector2(0.12f, 0.28f);
+
+        [Tooltip("Randomize initial Z rotation 0..360 so sprites don't align.")]
+        public bool randomizeInitialRotation = true;
 
         float _groundY;
+        Rigidbody2D _rb;
+        Collider2D _col;
+        SpriteRenderer _sr;
 
-        void OnEnable() { Active.Add(this); }
-        void OnDisable() { Active.Remove(this); }
+        void Awake()
+        {
+            _rb = GetComponent<Rigidbody2D>();
+            _col = GetComponent<Collider2D>();
+            _sr = GetComponent<SpriteRenderer>();
 
-        /// <summary>Called by spawner right after spawning.</summary>
+            _col.isTrigger = true;
+
+            _rb.bodyType = RigidbodyType2D.Dynamic;
+            _rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+            _rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+
+            // allow rotation for tumbling
+            _rb.freezeRotation = false;
+        }
+
+        void OnEnable() => Active.Add(this);
+        void OnDisable() => Active.Remove(this);
+
         public void Init(FruitData fd, float speedMultiplier, float groundY)
         {
             data = fd;
             _groundY = groundY;
 
-            var sr = GetComponent<SpriteRenderer>();
-            sr.sprite = fd.sprite;
-            sr.color = fd.tint;
+            if (_sr)
+            {
+                _sr.sprite = fd.sprite;
+                _sr.color = fd.tint;
 
-            // Use UnityEngine.Random via alias (URandom) to avoid ambiguity
+                const float targetW = 0.8f;
+                if (_sr.sprite)
+                {
+                    float w = _sr.sprite.bounds.size.x;
+                    if (w > 0.0001f) transform.localScale = Vector3.one * (targetW / w);
+                }
+            }
+
             fallSpeed = URandom.Range(fd.minFallSpeed, fd.maxFallSpeed) * speedMultiplier;
 
-            // Normalize width ≈ 0.8 world units so all fruits look consistent.
-            const float targetW = 0.8f;
-            if (sr.sprite)
+            if (gravityScaleOverride > 0f)
+                _rb.gravityScale = gravityScaleOverride;
+
+            // Difficulty overrides (if present)
+            if (DifficultyManager.HasCurrent)
             {
-                float w = sr.sprite.bounds.size.x;
-                if (w > 0.0001f) transform.localScale = Vector3.one * (targetW / w);
+                var s = DifficultyManager.Current;
+                if (s.gravityScale > 0f) _rb.gravityScale = s.gravityScale;
+                if (s.maxFallSpeed > 0f) maxFallSpeed = s.maxFallSpeed;
+                if (s.initialDownBoost > 0f) _rb.linearVelocity = new Vector2(0f, -s.initialDownBoost);
             }
+            else if (initialDownBoost > 0f)
+            {
+                _rb.linearVelocity = new Vector2(0f, -initialDownBoost);
+            }
+
+            // --- Unique tumble per instance ---
+            if (randomizeInitialRotation)
+            {
+                float z = URandom.Range(0f, 360f);
+                transform.rotation = Quaternion.Euler(0f, 0f, z);
+            }
+
+            // Angular drag randomization
+            _rb.angularDamping = Mathf.Clamp(URandom.Range(angularDragRange.x, angularDragRange.y), 0f, 10f);
+
+            // Set angular velocity (deg/sec) with random direction
+            float angMag = URandom.Range(Mathf.Min(angularVelRange.x, angularVelRange.y),
+                                         Mathf.Max(angularVelRange.x, angularVelRange.y));
+            float sign = (URandom.value < 0.5f) ? -1f : 1f; // clockwise negative by convention
+            _rb.angularVelocity = sign * angMag;
+
+            // Add a small one-time torque impulse for extra variation
+            float torque = URandom.Range(torqueImpulseRange.x, torqueImpulseRange.y) * ((URandom.value < 0.5f) ? -1f : 1f);
+            _rb.AddTorque(torque, ForceMode2D.Impulse);
 
             name = $"Fruit_{fd.id}";
         }
 
-        void Update()
+        void FixedUpdate()
         {
-            // Fall downward each frame.
-            transform.position += Vector3.down * fallSpeed * Time.deltaTime;
-
-            // MAGNET: pull ONLY non-bombs toward the player (bombs are unaffected).
+            // Magnet pulls non-bombs only
             if (!data.isBomb && PowerupManager.MagnetActive && PowerupManager.PlayerTransform)
             {
-                Vector3 to = PowerupManager.PlayerTransform.position - transform.position;
+                Vector2 to = (Vector2)PowerupManager.PlayerTransform.position - _rb.position;
                 float dist = to.magnitude;
                 float radius = PowerupManager.MagnetRadius;
 
                 if (dist <= radius && dist > 0.001f)
                 {
-                    // Stronger pull when closer to player for a nicer curve.
-                    float closeness = 1f - Mathf.Clamp01(dist / radius); // 0 far .. 1 near
-                    float speed = PowerupManager.MagnetPullSpeed * (0.4f + 0.6f * closeness);
-
-                    Vector3 step = to.normalized * speed * Time.deltaTime;
-
-                    // Prevent overshooting the player center in one frame.
-                    if (step.sqrMagnitude > to.sqrMagnitude) step = to;
-
-                    transform.position += step;
+                    float closeness = 1f - Mathf.Clamp01(dist / radius);
+                    float accel = PowerupManager.MagnetPullSpeed * (0.4f + 0.6f * closeness);
+                    _rb.AddForce(to.normalized * accel, ForceMode2D.Force);
                 }
+            }
+
+            // Terminal velocity cap
+            if (maxFallSpeed > 0f && _rb.linearVelocity.y < -maxFallSpeed)
+            {
+                var v = _rb.linearVelocity;
+                v.y = -maxFallSpeed;
+                _rb.linearVelocity = v;
             }
         }
 
@@ -78,12 +146,9 @@ namespace CatchTheFruit
         {
             if (!other.CompareTag("Player")) return;
 
-            // Notify systems.
             GameEvents.RaiseFruitCaught(data.id, data.scoreValue, data.isBomb);
 
-            // If this fruit grants a power-up, announce it.
-            if (data.powerup)
-                GameEvents.RaisePowerupPicked(data.powerup);
+            if (data.powerup) GameEvents.RaisePowerupPicked(data.powerup);
             if (data.isBomb) VFXManager.Instance?.PlayBombExplosion(transform.position);
 
             Destroy(gameObject);
@@ -91,7 +156,6 @@ namespace CatchTheFruit
 
         void LateUpdate()
         {
-            // If it hits the ground line, it's a miss.
             if (transform.position.y <= _groundY)
             {
                 bool isPowerup = data.powerup != null;
@@ -101,4 +165,3 @@ namespace CatchTheFruit
         }
     }
 }
-

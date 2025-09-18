@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: FD_Freeze
   m_EditorClassIdentifier: 
   id: Freeze
-  sprite: {fileID: -7681848372379829315, guid: b4e8716068d1fad4ab012621748a9b8b, type: 3}
+  sprite: {fileID: -8924616481162089418, guid: 9db2cef787e050f4ea236cd5d99f0ad0, type: 3}
   tint: {r: 1, g: 1, b: 1, a: 1}
   scoreValue: 0
   minFallSpeed: 2
   maxFallSpeed: 5
-  weight: 0.5
+  weight: 0.4
   isBomb: 0
   powerup: {fileID: 11400000, guid: 34b513c6b52f4444dbc2c04f43cc1f42, type: 2}

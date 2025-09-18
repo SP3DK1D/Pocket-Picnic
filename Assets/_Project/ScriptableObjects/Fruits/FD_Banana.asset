@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FD_Banana
   m_EditorClassIdentifier: 
   id: Banana
-  sprite: {fileID: -2843418035105911325, guid: 510c10fc39a3469418a338f836e52d5a, type: 3}
+  sprite: {fileID: -5333134594585807079, guid: 9698b21aa16d6a641a7c6639848b8312, type: 3}
   tint: {r: 1, g: 1, b: 1, a: 1}
   scoreValue: 2
   minFallSpeed: 2

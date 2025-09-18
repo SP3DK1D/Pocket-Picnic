@@ -16,7 +16,7 @@ namespace CatchTheFruit
 
         [Header("Badge visuals")]
         public Vector2 badgeSize = new Vector2(80, 80);
-        public Color iconTint = Color.white;
+        public Color iconTint = Color.black;
         public Color ringColor = new Color(1f, 1f, 1f, 0.9f);
         public TMP_FontAsset font; // optional; if null it uses default
 

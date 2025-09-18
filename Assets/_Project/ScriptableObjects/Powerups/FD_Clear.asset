@@ -18,6 +18,6 @@ MonoBehaviour:
   scoreValue: 1
   minFallSpeed: 2
   maxFallSpeed: 5
-  weight: 0.4
+  weight: 0.1
   isBomb: 0
   powerup: {fileID: 11400000, guid: b1e629e6503039b488c354c9ceea70e4, type: 2}
