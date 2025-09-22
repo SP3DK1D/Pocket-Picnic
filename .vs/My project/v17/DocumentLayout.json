@@ -3,20 +3,68 @@
   "WorkspaceRootPath": "D:\\yt vids\\My project\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\gameplay\\fruitspawner.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|d:\\yt vids\\my project\\assets\\_project\\scripts\\managers\\challengedirector.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\managers\\challengedirector.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|d:\\yt vids\\my project\\assets\\_project\\scripts\\gameplay\\fruitspawner.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\gameplay\\fruitspawner.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\managers\\streakmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\managers\\streakmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\core\\gameevents.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\core\\gameevents.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\gameplay\\difficulty\\difficultymanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\gameplay\\difficulty\\difficultymanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\gameplay\\fruit.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\gameplay\\fruit.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|d:\\yt vids\\my project\\assets\\_project\\scripts\\utility\\startbuttonplayeractivator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\utility\\startbuttonplayeractivator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\managers\\powerupmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\managers\\powerupmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\managers\\difficultymanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\managers\\difficultymanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\ui\\powerupoverlay.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\ui\\powerupoverlay.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\ui\\uimenucontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\ui\\uimenucontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\managers\\pausemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\managers\\pausemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\data\\powerupdef.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\data\\powerupdef.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\gameplay\\fruitpool.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\gameplay\\fruitpool.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\audio\\audiomanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\audio\\audiomanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\ui\\menuflowcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\ui\\menuflowcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\UIActivePowerups.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\_Project\\Scripts\\UI\\UIActivePowerups.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\ui\\uihud.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\ui\\uihud.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\MenuHooks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -25,14 +73,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\PlayerVisibility.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\_Project\\Scripts\\Utility\\PlayerVisibility.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\ui\\uihud.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\ui\\uihud.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\ui\\uibestscoretext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\ui\\uibestscoretext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\utility\\scalepunch.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -47,24 +87,12 @@
       "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\utility\\safeareafitter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\utility\\eyeblink.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\utility\\eyeblink.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\ui\\uiactivepowerups.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\ui\\uiactivepowerups.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\managers\\scoremanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\managers\\scoremanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\ui\\uiscoremulriplierglow.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\ui\\uiscoremulriplierglow.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\ui\\scoredeltapopper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\ui\\scoredeltapopper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\utility\\softsnapintobasket.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -79,28 +107,12 @@
       "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\audio\\audiohub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\core\\gameevents.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\core\\gameevents.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\utility\\juicelisteners.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\utility\\juicelisteners.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\yt vids\\My project\\Assets\\_Project\\Audio\\Scripts\\SfxLibrary.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\_Project\\Audio\\Scripts\\SfxLibrary.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Audio\\SfxCue.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\_Project\\Scripts\\Audio\\SfxCue.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\ui\\pauseui.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\ui\\pauseui.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\managers\\pausemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\managers\\pausemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\utility\\haptics.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -115,10 +127,6 @@
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\_Project\\Scripts\\Data\\LevelSequence.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\managers\\powerupmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\managers\\powerupmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\BackgroundFitter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\_Project\\Scripts\\UI\\BackgroundFitter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -131,16 +139,8 @@
       "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\managers\\timersystem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\ui\\powerupoverlay.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\ui\\powerupoverlay.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\data\\spawntable.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\data\\spawntable.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\data\\powerupdef.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\data\\powerupdef.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\managers\\lifemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -219,10 +219,6 @@
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\_Project\\Scripts\\Audio\\AudioRouter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Audio\\AudioManager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\_Project\\Scripts\\Audio\\AudioManager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\yt vids\\My project\\Assets\\_Project\\Audio\\Scripts\\VolumeUI.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\_Project\\Audio\\Scripts\\VolumeUI.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -257,6 +253,34 @@
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Waves\\WaveDirector.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\_Project\\Scripts\\Waves\\WaveDirector.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\UIBestScoreText.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\_Project\\Scripts\\UI\\UIBestScoreText.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\ScoreDeltaPopper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\_Project\\Scripts\\UI\\ScoreDeltaPopper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\StartButtonPlayerActivator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\_Project\\Scripts\\Utility\\StartButtonPlayerActivator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\EyeBlink.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\_Project\\Scripts\\Utility\\EyeBlink.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\PauseUI.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\_Project\\Scripts\\UI\\PauseUI.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\JuiceListeners.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\_Project\\Scripts\\Utility\\JuiceListeners.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\DifficultyManager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\_Project\\Scripts\\Managers\\DifficultyManager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -266,7 +290,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Document",
@@ -283,80 +307,154 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "SafeAreaFitter.cs",
-              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\SafeAreaFitter.cs",
-              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Utility\\SafeAreaFitter.cs",
-              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\SafeAreaFitter.cs",
-              "RelativeToolTip": "Assets\\_Project\\Scripts\\Utility\\SafeAreaFitter.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB0AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-17T23:00:15.427Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 22,
-              "Title": "SfxCue.cs",
-              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Audio\\SfxCue.cs",
-              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Audio\\SfxCue.cs",
-              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Audio\\SfxCue.cs",
-              "RelativeToolTip": "Assets\\_Project\\Scripts\\Audio\\SfxCue.cs",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-11T00:00:32.665Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 5,
               "Title": "Fruit.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Gameplay\\Fruit.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Gameplay\\Fruit.cs",
               "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Gameplay\\Fruit.cs",
               "RelativeToolTip": "Assets\\_Project\\Scripts\\Gameplay\\Fruit.cs",
-              "ViewState": "AgIAAIYAAAAAAAAAAAAgwKcAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAJoAAAAAAAAAAAAgwLsAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-08T18:58:00.666Z",
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "ChallengeDirector.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\ChallengeDirector.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Managers\\ChallengeDirector.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\ChallengeDirector.cs",
+              "RelativeToolTip": "Assets\\_Project\\Scripts\\Managers\\ChallengeDirector.cs",
+              "ViewState": "AgIAAGgAAAAAAAAAAAAgwIkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-22T02:35:06.947Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "StreakManager.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\StreakManager.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Managers\\StreakManager.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\StreakManager.cs",
+              "RelativeToolTip": "Assets\\_Project\\Scripts\\Managers\\StreakManager.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAEwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-22T02:28:12.734Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "DifficultyManager.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Gameplay\\Difficulty\\DifficultyManager.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Gameplay\\Difficulty\\DifficultyManager.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Gameplay\\Difficulty\\DifficultyManager.cs",
+              "RelativeToolTip": "Assets\\_Project\\Scripts\\Gameplay\\Difficulty\\DifficultyManager.cs",
+              "ViewState": "AgIAABYAAAAAAAAAAAAgwDcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-22T02:22:31.974Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
               "Title": "FruitSpawner.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Gameplay\\FruitSpawner.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Gameplay\\FruitSpawner.cs",
               "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Gameplay\\FruitSpawner.cs",
               "RelativeToolTip": "Assets\\_Project\\Scripts\\Gameplay\\FruitSpawner.cs",
-              "ViewState": "AgIAAKkAAAAAAAAAAAAgwMoAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAN0AAAAAAAAAAAAgwP4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-09T01:17:27.687Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "PlayerVisibility.cs",
-              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\PlayerVisibility.cs",
-              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Utility\\PlayerVisibility.cs",
-              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\PlayerVisibility.cs",
-              "RelativeToolTip": "Assets\\_Project\\Scripts\\Utility\\PlayerVisibility.cs",
+              "DocumentIndex": 8,
+              "Title": "UIMenuController.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\UIMenuController.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\UI\\UIMenuController.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\UIMenuController.cs",
+              "RelativeToolTip": "Assets\\_Project\\Scripts\\UI\\UIMenuController.cs",
+              "ViewState": "AgIAAFgAAAAAAAAAAAAgwHkAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-18T01:08:19.911Z"
+              "WhenOpened": "2025-09-19T01:04:11.202Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "StartButtonPlayerActivator.cs",
-              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\StartButtonPlayerActivator.cs",
-              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Utility\\StartButtonPlayerActivator.cs",
-              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\StartButtonPlayerActivator.cs",
-              "RelativeToolTip": "Assets\\_Project\\Scripts\\Utility\\StartButtonPlayerActivator.cs",
-              "ViewState": "AgIAAEYAAAAAAAAAAAAgwGcAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 3,
+              "Title": "GameEvents.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Core\\GameEvents.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Core\\GameEvents.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Core\\GameEvents.cs",
+              "RelativeToolTip": "Assets\\_Project\\Scripts\\Core\\GameEvents.cs",
+              "ViewState": "AgIAACsAAAAAAAAAAAAqwD0AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-18T01:31:33.3Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-11T01:11:35.29Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "PowerupManager.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\PowerupManager.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Managers\\PowerupManager.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\PowerupManager.cs",
+              "RelativeToolTip": "Assets\\_Project\\Scripts\\Managers\\PowerupManager.cs",
+              "ViewState": "AgIAAAEBAAAAAAAAAAAgwCIBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-08T18:56:49.685Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 7,
+              "Title": "PowerupOverlay.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\PowerupOverlay.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\UI\\PowerupOverlay.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\PowerupOverlay.cs",
+              "RelativeToolTip": "Assets\\_Project\\Scripts\\UI\\PowerupOverlay.cs",
+              "ViewState": "AgIAAB4AAAAAAAAAAAAgwD8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-09T01:27:29.297Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "PauseManager.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\PauseManager.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Managers\\PauseManager.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\PauseManager.cs",
+              "RelativeToolTip": "Assets\\_Project\\Scripts\\Managers\\PauseManager.cs",
+              "ViewState": "AgIAABUAAAAAAAAAAAAgwDYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-09T03:00:05.655Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "FruitPool.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Gameplay\\FruitPool.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Gameplay\\FruitPool.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Gameplay\\FruitPool.cs",
+              "RelativeToolTip": "Assets\\_Project\\Scripts\\Gameplay\\FruitPool.cs",
+              "ViewState": "AgIAACsAAAAAAAAAAAAgwEwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-18T23:48:34.391Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "PowerupDef.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Data\\PowerupDef.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Data\\PowerupDef.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Data\\PowerupDef.cs",
+              "RelativeToolTip": "Assets\\_Project\\Scripts\\Data\\PowerupDef.cs",
+              "ViewState": "AgIAABAAAAAAAAAAAAAswCYAAAAzAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-08T18:55:50.55Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 63,
               "Title": "UIBestScoreText.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\UIBestScoreText.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\UI\\UIBestScoreText.cs",
@@ -368,7 +466,53 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 14,
+              "Title": "UIActivePowerups.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\UIActivePowerups.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\UI\\UIActivePowerups.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\UIActivePowerups.cs",
+              "RelativeToolTip": "Assets\\_Project\\Scripts\\UI\\UIActivePowerups.cs",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-08T18:59:50.353Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "SfxCue.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Audio\\SfxCue.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Audio\\SfxCue.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Audio\\SfxCue.cs",
+              "RelativeToolTip": "Assets\\_Project\\Scripts\\Audio\\SfxCue.cs",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-11T00:00:32.665Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "AudioManager.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Audio\\AudioManager.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Audio\\AudioManager.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Audio\\AudioManager.cs",
+              "RelativeToolTip": "Assets\\_Project\\Scripts\\Audio\\AudioManager.cs",
+              "ViewState": "AgIAAFYAAAAAAAAAAAAgwHcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-10T23:51:37.158Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "UIHud.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\UIHud.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\UI\\UIHud.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\UIHud.cs",
+              "RelativeToolTip": "Assets\\_Project\\Scripts\\UI\\UIHud.cs",
+              "ViewState": "AgIAALUAAAAAAAAAAAAgwNYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-09T01:34:08.296Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
               "Title": "ScoreManager.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\ScoreManager.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Managers\\ScoreManager.cs",
@@ -380,7 +524,54 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 13,
+              "Title": "MenuFlowController.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\MenuFlowController.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\UI\\MenuFlowController.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\MenuFlowController.cs",
+              "RelativeToolTip": "Assets\\_Project\\Scripts\\UI\\MenuFlowController.cs",
+              "ViewState": "AgIAAHQAAAAAAAAAAAAgwJUAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-18T21:06:41.203Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 65,
+              "Title": "StartButtonPlayerActivator.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\StartButtonPlayerActivator.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Utility\\StartButtonPlayerActivator.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\StartButtonPlayerActivator.cs",
+              "RelativeToolTip": "Assets\\_Project\\Scripts\\Utility\\StartButtonPlayerActivator.cs",
+              "ViewState": "AgIAAEYAAAAAAAAAAAAgwGcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-18T01:31:33.3Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "PlayerVisibility.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\PlayerVisibility.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Utility\\PlayerVisibility.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\PlayerVisibility.cs",
+              "RelativeToolTip": "Assets\\_Project\\Scripts\\Utility\\PlayerVisibility.cs",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-18T01:08:19.911Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "SafeAreaFitter.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\SafeAreaFitter.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Utility\\SafeAreaFitter.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\SafeAreaFitter.cs",
+              "RelativeToolTip": "Assets\\_Project\\Scripts\\Utility\\SafeAreaFitter.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-17T23:00:15.427Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 69,
               "Title": "DifficultyManager.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\DifficultyManager.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Managers\\DifficultyManager.cs",
@@ -392,7 +583,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 16,
               "Title": "MenuHooks.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\MenuHooks.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Utility\\MenuHooks.cs",
@@ -403,31 +594,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "UIHud.cs",
-              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\UIHud.cs",
-              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\UI\\UIHud.cs",
-              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\UIHud.cs",
-              "RelativeToolTip": "Assets\\_Project\\Scripts\\UI\\UIHud.cs",
-              "ViewState": "AgIAAEAAAAAAAAAAAADwv1QAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-09T01:34:08.296Z"
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 19,
-              "Title": "GameEvents.cs",
-              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Core\\GameEvents.cs",
-              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Core\\GameEvents.cs",
-              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Core\\GameEvents.cs",
-              "RelativeToolTip": "Assets\\_Project\\Scripts\\Core\\GameEvents.cs",
-              "ViewState": "AgIAACkAAAAAAAAAAAA8wDMAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-11T01:11:35.29Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
               "Title": "PlayerMover.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Gameplay\\PlayerMover.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Gameplay\\PlayerMover.cs",
@@ -439,7 +606,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 66,
               "Title": "EyeBlink.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\EyeBlink.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Utility\\EyeBlink.cs",
@@ -451,7 +618,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 18,
               "Title": "ScalePunch.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\ScalePunch.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Utility\\ScalePunch.cs",
@@ -463,19 +630,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "UIActivePowerups.cs",
-              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\UIActivePowerups.cs",
-              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\UI\\UIActivePowerups.cs",
-              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\UIActivePowerups.cs",
-              "RelativeToolTip": "Assets\\_Project\\Scripts\\UI\\UIActivePowerups.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB0AAAAvAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-08T18:59:50.353Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 64,
               "Title": "ScoreDeltaPopper.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\ScoreDeltaPopper.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\UI\\ScoreDeltaPopper.cs",
@@ -487,7 +642,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 58,
+              "DocumentIndex": 57,
               "Title": "SfxCue.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Audio\\Scripts\\SfxCue.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Audio\\Scripts\\SfxCue.cs",
@@ -499,7 +654,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 26,
               "Title": "SfxLibrary.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Audio\\Scripts\\SfxLibrary.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Audio\\Scripts\\SfxLibrary.cs",
@@ -510,7 +665,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 22,
               "Title": "UIScoreMulriplierGlow.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\UIScoreMulriplierGlow.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\UI\\UIScoreMulriplierGlow.cs",
@@ -522,7 +677,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 24,
               "Title": "JuiceAudioListeners.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Audio\\JuiceAudioListeners.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Audio\\JuiceAudioListeners.cs",
@@ -534,7 +689,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 25,
               "Title": "AudioHub.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Audio\\AudioHub.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Audio\\AudioHub.cs",
@@ -546,7 +701,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 57,
+              "DocumentIndex": 56,
               "Title": "AudioManager.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Audio\\Scripts\\AudioManager.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Audio\\Scripts\\AudioManager.cs",
@@ -558,7 +713,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 23,
               "Title": "SoftSnapIntoBasket.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\SoftSnapIntoBasket.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Utility\\SoftSnapIntoBasket.cs",
@@ -570,7 +725,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 68,
               "Title": "JuiceListeners.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\JuiceListeners.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Utility\\JuiceListeners.cs",
@@ -582,7 +737,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 56,
+              "DocumentIndex": 55,
               "Title": "MusicManager.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Audio\\Scripts\\MusicManager.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Audio\\Scripts\\MusicManager.cs",
@@ -594,7 +749,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 55,
+              "DocumentIndex": 54,
               "Title": "VolumeUI.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Audio\\Scripts\\VolumeUI.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Audio\\Scripts\\VolumeUI.cs",
@@ -606,7 +761,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 59,
+              "DocumentIndex": 58,
               "Title": "SimpleAudio.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Audio\\SimpleAudio.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Audio\\SimpleAudio.cs",
@@ -618,7 +773,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 60,
+              "DocumentIndex": 59,
               "Title": "PauseVolumeUI.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Audio\\PauseVolumeUI.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Audio\\PauseVolumeUI.cs",
@@ -630,19 +785,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 54,
-              "Title": "AudioManager.cs",
-              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Audio\\AudioManager.cs",
-              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Audio\\AudioManager.cs",
-              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Audio\\AudioManager.cs",
-              "RelativeToolTip": "Assets\\_Project\\Scripts\\Audio\\AudioManager.cs",
-              "ViewState": "AgIAAEMAAAAAAAAAAAAYwHAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-10T23:51:37.158Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 26,
+              "DocumentIndex": 29,
               "Title": "SettingsManager.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\SettingsManager.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Managers\\SettingsManager.cs",
@@ -654,7 +797,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 27,
+              "DocumentIndex": 30,
               "Title": "LevelSequence.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Data\\LevelSequence.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Data\\LevelSequence.cs",
@@ -665,19 +808,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 24,
-              "Title": "PauseManager.cs",
-              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\PauseManager.cs",
-              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Managers\\PauseManager.cs",
-              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\PauseManager.cs",
-              "RelativeToolTip": "Assets\\_Project\\Scripts\\Managers\\PauseManager.cs",
-              "ViewState": "AgIAAA8AAAAAAAAAAAAYwDwAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-09T03:00:05.655Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 23,
+              "DocumentIndex": 67,
               "Title": "PauseUI.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\PauseUI.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\UI\\PauseUI.cs",
@@ -686,18 +817,6 @@
               "ViewState": "AgIAAAgAAAAAAAAAAAAYwDUAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-09T03:00:57.506Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 32,
-              "Title": "PowerupOverlay.cs",
-              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\PowerupOverlay.cs",
-              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\UI\\PowerupOverlay.cs",
-              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\PowerupOverlay.cs",
-              "RelativeToolTip": "Assets\\_Project\\Scripts\\UI\\PowerupOverlay.cs",
-              "ViewState": "AgIAAFAAAAAAAAAAAAAzwH0AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-09T01:27:29.297Z"
             },
             {
               "$type": "Document",
@@ -713,7 +832,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 25,
+              "DocumentIndex": 28,
               "Title": "Haptics.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\Haptics.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Utility\\Haptics.cs",
@@ -725,7 +844,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 62,
+              "DocumentIndex": 61,
               "Title": "LevelSequence.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Waves\\LevelSequence.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Waves\\LevelSequence.cs",
@@ -737,7 +856,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 61,
+              "DocumentIndex": 60,
               "Title": "LevelDef.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Waves\\LevelDef.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Waves\\LevelDef.cs",
@@ -749,7 +868,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 63,
+              "DocumentIndex": 62,
               "Title": "WaveDirector.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Waves\\WaveDirector.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Waves\\WaveDirector.cs",
@@ -773,7 +892,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 30,
+              "DocumentIndex": 32,
               "Title": "VFXManager.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\VFXManager.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Managers\\VFXManager.cs",
@@ -785,19 +904,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 28,
-              "Title": "PowerupManager.cs",
-              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\PowerupManager.cs",
-              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Managers\\PowerupManager.cs",
-              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\PowerupManager.cs",
-              "RelativeToolTip": "Assets\\_Project\\Scripts\\Managers\\PowerupManager.cs",
-              "ViewState": "AgIAAKgAAAAAAAAAAAAAwNQAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-08T18:56:49.685Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 31,
+              "DocumentIndex": 33,
               "Title": "TimerSystem.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\TimerSystem.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Managers\\TimerSystem.cs",
@@ -821,7 +928,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 29,
+              "DocumentIndex": 31,
               "Title": "BackgroundFitter.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\BackgroundFitter.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\UI\\BackgroundFitter.cs",
@@ -832,7 +939,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 33,
+              "DocumentIndex": 34,
               "Title": "SpawnTable.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Data\\SpawnTable.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Data\\SpawnTable.cs",
@@ -853,18 +960,6 @@
               "ViewState": "AgIAABEAAAAAAAAAAAAYwD4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-08T18:58:55.592Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 34,
-              "Title": "PowerupDef.cs",
-              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Data\\PowerupDef.cs",
-              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Data\\PowerupDef.cs",
-              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Data\\PowerupDef.cs",
-              "RelativeToolTip": "Assets\\_Project\\Scripts\\Data\\PowerupDef.cs",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAYwDMAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-08T18:55:50.55Z"
             },
             {
               "$type": "Document",

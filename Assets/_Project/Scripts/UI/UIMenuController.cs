@@ -1,72 +1,77 @@
-﻿using TMPro;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace CatchTheFruit
 {
-    /// <summary>
-    /// Toggles Menu/HUD/GameOver panels; relays button clicks to events.
-    /// </summary>
     public class UIMenuController : MonoBehaviour
     {
         [Header("Panels")]
-        public GameObject menuPanel;
-        public GameObject hudPanel;
-        public GameObject overPanel;
+        [SerializeField] private GameObject mainMenuPanel;
+        [SerializeField] private GameObject difficultyPanel;
+        [SerializeField] private GameObject hudPanel;
+        [SerializeField] private GameObject pausePanel;
 
-        [Header("Final Score (GameOver)")]
-        public TMP_Text finalScoreText;
+        [Header("Optional")]
+        [SerializeField] private GameObject player;
 
-        private int _lastScore;
+        [Header("Debug")]
+        [SerializeField] private bool autoStartDebug = false;   // <-- NEW
 
-        private void OnEnable()
+        void Awake()
         {
-            GameEvents.OnScoreChanged += CacheScore;
-            GameEvents.OnGameStart += ShowHUD;
-            GameEvents.OnGameOver += ShowOver;
-        }
-        private void OnDisable()
-        {
-            GameEvents.OnScoreChanged -= CacheScore;
-            GameEvents.OnGameStart -= ShowHUD;
-            GameEvents.OnGameOver -= ShowOver;
-        }
+            ShowOnly(mainMenuPanel);
+            SafeSetActive(player, false);
 
-        private void Start() => ShowMenu();
-
-        private void CacheScore(int s) => _lastScore = s;
-
-        public void ShowMenu()
-        {
-            menuPanel?.SetActive(true);
-            hudPanel?.SetActive(false);
-            overPanel?.SetActive(false);
+            // ---- TEMP: force a run so fruits spawn while we fix wiring ----
+            if (autoStartDebug)
+            {
+                DifficultyManager.PickEasy();   // static
+                BeginGame();
+            }
         }
 
-        private void ShowHUD()
+        public void OnStartPressed() => ShowOnly(difficultyPanel);
+        public void OnPickEasy() { DifficultyManager.PickEasy(); BeginGame(); }
+        public void OnPickMedium() { DifficultyManager.PickMedium(); BeginGame(); }
+        public void OnPickHard() { DifficultyManager.PickHard(); BeginGame(); }
+
+        void BeginGame()
         {
-            menuPanel?.SetActive(false);
-            hudPanel?.SetActive(true);
-            overPanel?.SetActive(false);
+            ShowOnly(hudPanel);
+            SafeSetActive(player, true);
+            GameEvents.RaiseGameStart();        // <-- Spawner listens to this
         }
 
-        private void ShowOver()
+        public void OnPause() { PauseManager.Instance?.Pause(); SafeSetActive(pausePanel, true); }
+        public void OnResume() { PauseManager.Instance?.Resume(); SafeSetActive(pausePanel, false); }
+        public void OnRestart()
         {
-            menuPanel?.SetActive(false);
-            hudPanel?.SetActive(false);
-            overPanel?.SetActive(true);
-            if (finalScoreText) finalScoreText.text = $"Score: {_lastScore}";
+            PauseManager.Instance?.ResumeForce();
+            SafeSetActive(pausePanel, false);
+            GameEvents.RaiseGameOver();
+            GameEvents.RaiseGameStart();
+            ShowOnly(hudPanel);
+            SafeSetActive(player, true);
+        }
+        public void OnBackToMenu()
+        {
+            PauseManager.Instance?.ResumeForce();
+            SafeSetActive(pausePanel, false);
+            GameEvents.RaiseGameOver();
+            DifficultyManager.ClearCurrent();
+            ShowOnly(mainMenuPanel);
+            SafeSetActive(player, false);
         }
 
-        // Button hooks (assign in Inspector)
-        public void Btn_Start() => GameEvents.RaiseGameStart();
-        public void Btn_Menu() => ShowMenu();
+        void ShowOnly(GameObject toShow)
+        {
+            if (mainMenuPanel) mainMenuPanel.SetActive(toShow == mainMenuPanel);
+            if (difficultyPanel) difficultyPanel.SetActive(toShow == difficultyPanel);
+            if (hudPanel) hudPanel.SetActive(toShow == hudPanel);
+            if (pausePanel) pausePanel.SetActive(toShow == pausePanel);
+        }
+        void SafeSetActive(GameObject go, bool on)
+        {
+            if (go && go.activeSelf != on) go.SetActive(on);
+        }
     }
 }
-/*
-UNITY IMPLEMENTATION
-1) Canvas children: Panel_Menu, Panel_HUD, Panel_GameOver (Menu active, others inactive).
-2) Create 'UI_Menu' → add UIMenuController → assign the 3 panels + FinalScore text.
-3) Buttons:
-   - Start button OnClick → UI_Menu.UIMenuController.Btn_Start()
-   - Menu  button OnClick → UI_Menu.UIMenuController.Btn_Menu()
-*/

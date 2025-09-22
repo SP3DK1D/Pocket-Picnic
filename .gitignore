@@ -22,7 +22,7 @@ sysinfo.txt
 *.mdb
 *.opendb
 *.VC.db
-
+*.vs/
 # Crash Reports
 *.pidb.meta
 *.pdb.meta

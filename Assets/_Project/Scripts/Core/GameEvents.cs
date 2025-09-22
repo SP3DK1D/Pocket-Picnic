@@ -42,6 +42,22 @@ namespace CatchTheFruit
         public static void RaisePowerupPicked(PowerupDef def) => OnPowerupPicked?.Invoke(def);
         public static void RaisePowerupStarted(PowerupDef def) => OnPowerupStarted?.Invoke(def);
         public static void RaisePowerupEnded(PowerupDef def) => OnPowerupEnded?.Invoke(def);
+
+        // NEW: meta/gameplay UI
+        public static event Action<string, float> OnWaveMessage;   // (text, seconds)
+        public static void RaiseWaveMessage(string msg, float seconds = 1.6f) => OnWaveMessage?.Invoke(msg, seconds);
+
+        // NEW: streaks
+        public static event Action<int, int> OnStreakChanged;      // (current, best)
+        public static void RaiseStreakChanged(int current, int best) => OnStreakChanged?.Invoke(current, best);
+
+        // NEW: challenges lifecycle
+        public enum ChallengeKind { None, BananaBlitz, BombStorm, GoldenTime }
+        public static event Action<ChallengeKind> OnChallengeStarted;
+        public static event Action<ChallengeKind> OnChallengeEnded;
+        public static void RaiseChallengeStarted(ChallengeKind k) => OnChallengeStarted?.Invoke(k);
+        public static void RaiseChallengeEnded(ChallengeKind k) => OnChallengeEnded?.Invoke(k);
+
     }
 }
 /*

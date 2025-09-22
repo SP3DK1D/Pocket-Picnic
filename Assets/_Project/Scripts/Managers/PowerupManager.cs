@@ -1,212 +1,290 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using static CatchTheFruit.PowerupDef;
 
 namespace CatchTheFruit
 {
     /// <summary>
-    /// Applies power-ups. Only TimeScale touches Time.timeScale.
-    /// ClearScreen awards points for all visible NON-bomb fruits, then clears them.
+    /// Central handler for all power-ups.
+    /// Works with minimal PowerupDef (kind + duration). The rest come from Inspector defaults.
+    /// Freeze, Score×, Magnet, Shield, Clear are supported.
     /// </summary>
     public class PowerupManager : MonoBehaviour
     {
         public static PowerupManager Instance { get; private set; }
 
-        [Header("Player (for Magnet). Leave empty to find by tag 'Player'.")]
-        [SerializeField] Transform player;
+        // -------- Static state other systems read (Fruit, UI, etc.) --------
+        public static Transform PlayerTransform { get; private set; }
 
-        // --- Freeze (TimeScale)
-        bool _tsActive; float _tsEnd; float _prevTS = 1f; float _prevFDT = 0.02f; PowerupDef _tsDef;
+        // Magnet
+        public static bool MagnetActive { get; private set; }
+        public static float MagnetRadius { get; private set; }
+        public static float MagnetPullSpeed { get; private set; }
 
-        // --- Score Multiplier
-        bool _mulActive; float _mulEnd; PowerupDef _mulDef;
+        // Shield
+        public static bool ShieldActive { get; private set; }
 
-        // --- Magnet
-        bool _magActive; float _magEnd; PowerupDef _magDef;
-        public static bool MagnetActive => Instance && Instance._magActive;
-        public static float MagnetRadius => Instance ? Instance._magDef?.magnetRadius ?? 0f : 0f;
-        public static float MagnetPullSpeed => Instance ? Instance._magDef?.magnetPullSpeed ?? 0f : 0f;
-        public static Transform PlayerTransform => Instance ? Instance.player : null;
+        // -------- Inspector defaults (used if def lacks params) --------
+        [Header("Freeze (TimeScale) Defaults")]
+        [Range(0.05f, 1f)][SerializeField] float defaultFreezeScale = 0.20f;
+        [Min(0.1f)][SerializeField] float defaultFreezeDur = 2.5f;
 
-        // --- Shield
-        bool _shieldActive; float _shieldEnd; PowerupDef _shieldDef;
-        public static bool ShieldActive => Instance && Instance._shieldActive;
+        [Header("Score× Defaults")]
+        [Min(1f)][SerializeField] float defaultScoreMul = 2f;
+        [Min(0.1f)][SerializeField] float defaultScoreDur = 7f;
+
+        [Header("Magnet Defaults")]
+        [Min(0.1f)][SerializeField] float defaultMagnetRadius = 6f;
+        [Min(0.1f)][SerializeField] float defaultMagnetPull = 22f; // world u/s^2 used as Δv in FixedUpdate
+        [Min(0.1f)][SerializeField] float defaultMagnetDur = 7f;
+
+        [Header("Shield Defaults")]
+        [Tooltip("0 = until consumed; >0 = time-limited")]
+        [Min(0f)][SerializeField] float defaultShieldDur = 0f;
+
+        // -------- internals --------
+        float _preFreezeScale = 1f;
+        bool _freezeActive;
+
+        PowerupDef _shieldDef;
+        bool _shieldTimed;
 
         void Awake()
         {
+            if (Instance && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
-            if (!player)
+
+            // auto-bind player by tag
+            if (!PlayerTransform)
             {
-                var p = GameObject.FindGameObjectWithTag("Player");
-                if (p) player = p.transform;
+                var go = GameObject.FindGameObjectWithTag("Player");
+                PlayerTransform = go ? go.transform : null;
             }
         }
 
         void OnEnable()
         {
             GameEvents.OnPowerupPicked += HandlePicked;
-            GameEvents.OnGameOver += ClearAll;   // <— now exists
+            GameEvents.OnGameStart += HandleGameStart;
+            GameEvents.OnGameOver += HandleGameOver;
         }
+
         void OnDisable()
         {
             GameEvents.OnPowerupPicked -= HandlePicked;
-            GameEvents.OnGameOver -= ClearAll;
-            ClearAll();
-            if (Instance == this) Instance = null;
+            GameEvents.OnGameStart -= HandleGameStart;
+            GameEvents.OnGameOver -= HandleGameOver;
+
+            StopAllCoroutines();
+            EndAllImmediate();
         }
 
-        void Update()
+        // ---------- lifecycle guards ----------
+        void HandleGameStart()
         {
-            float now = Time.unscaledTime;
-            if (_tsActive && now >= _tsEnd) EndTimeScale();
-            if (_mulActive && now >= _mulEnd) EndScoreMultiplier();
-            if (_magActive && now >= _magEnd) EndMagnet();
-            if (_shieldActive && _shieldDef && _shieldDef.duration > 0f && now >= _shieldEnd) EndShield();
+            if (!PlayerTransform)
+            {
+                var go = GameObject.FindGameObjectWithTag("Player");
+                PlayerTransform = go ? go.transform : null;
+            }
+            EndAllImmediate();
         }
 
+        void HandleGameOver() => EndAllImmediate();
+
+        void EndAllImmediate()
+        {
+            StopAllCoroutines();
+
+            if (_freezeActive)
+            {
+                Time.timeScale = 1f;
+                _freezeActive = false;
+            }
+
+            MagnetActive = false;
+
+            if (ShieldActive && _shieldDef != null)
+                GameEvents.RaisePowerupEnded(_shieldDef);
+            ShieldActive = false;
+            _shieldDef = null;
+            _shieldTimed = false;
+        }
+
+        // ---------- entry point from Fruit ----------
         void HandlePicked(PowerupDef def)
         {
             if (!def) return;
-            Debug.Log($"[PU] Picked: {def.id} ({def.kind})");
 
             switch (def.kind)
             {
-                case PowerupDef.PowerupKind.TimeScale: ApplyTimeScale(def); break;
-                case PowerupDef.PowerupKind.ScoreMultiplier: ApplyScoreMultiplier(def); break;
-                case PowerupDef.PowerupKind.Magnet: ApplyMagnet(def); break;
-                case PowerupDef.PowerupKind.Shield: ApplyShield(def); break;
-                case PowerupDef.PowerupKind.ClearScreen: DoClearScreen(def); break;
+                case PowerupKind.TimeScale: StartCoroutine(RunFreeze(def)); break;
+                case PowerupKind.ScoreMultiplier: StartCoroutine(RunScoreMultiplier(def)); break;
+                case PowerupKind.Magnet: StartCoroutine(RunMagnet(def)); break;
+                case PowerupKind.Shield: RunShield(def); break;
+                case PowerupKind.ClearScreen: StartCoroutine(RunClear(def)); break;
             }
         }
 
-        // ---------- TimeScale ----------
-        void ApplyTimeScale(PowerupDef def)
+        // ---------------- Freeze ----------------
+        IEnumerator RunFreeze(PowerupDef def)
         {
-            float dur = Mathf.Max(0.01f, def.duration);
-            float scale = Mathf.Clamp(def.timeScale, 0.05f, 1f);
+            float dur = (def.duration > 0f) ? def.duration : defaultFreezeDur;
+            float scale = defaultFreezeScale; // we don't depend on def.timeScale
 
-            if (_tsActive)
-            {
-                switch (def.overlapPolicy)
-                {
-                    case PowerupDef.OverlapPolicy.Ignore: return;
-                    case PowerupDef.OverlapPolicy.RefreshDuration: _tsEnd = Time.unscaledTime + dur; return;
-                    case PowerupDef.OverlapPolicy.Replace: EndTimeScale(); break;
-                }
-            }
-
-            _prevTS = Time.timeScale; _prevFDT = Time.fixedDeltaTime;
-            Time.timeScale = scale; Time.fixedDeltaTime = _prevFDT * scale;
-
-            _tsActive = true; _tsDef = def; _tsEnd = Time.unscaledTime + dur;
-            GameEvents.RaisePowerupStarted(def);
-        }
-        void EndTimeScale()
-        {
-            if (!_tsActive) return;
-            Time.timeScale = _prevTS; Time.fixedDeltaTime = _prevFDT;
-            _tsActive = false; GameEvents.RaisePowerupEnded(_tsDef); _tsDef = null;
-        }
-
-        // ---------- Score Multiplier ----------
-        void ApplyScoreMultiplier(PowerupDef def)
-        {
-            float dur = Mathf.Max(0.01f, def.duration);
-            if (_mulActive)
-            {
-                switch (def.overlapPolicy)
-                {
-                    case PowerupDef.OverlapPolicy.Ignore: return;
-                    case PowerupDef.OverlapPolicy.RefreshDuration: _mulEnd = Time.unscaledTime + dur; return;
-                    case PowerupDef.OverlapPolicy.Replace: EndScoreMultiplier(); break;
-                }
-            }
-            _mulActive = true; _mulDef = def; _mulEnd = Time.unscaledTime + dur;
-            GameEvents.RaisePowerupStarted(def);
-        }
-        void EndScoreMultiplier()
-        {
-            if (!_mulActive) return;
-            _mulActive = false; GameEvents.RaisePowerupEnded(_mulDef); _mulDef = null;
-        }
-
-        // ---------- Magnet ----------
-        void ApplyMagnet(PowerupDef def)
-        {
-            float dur = Mathf.Max(0.01f, def.duration);
-            if (_magActive)
-            {
-                switch (def.overlapPolicy)
-                {
-                    case PowerupDef.OverlapPolicy.Ignore: return;
-                    case PowerupDef.OverlapPolicy.RefreshDuration: _magEnd = Time.unscaledTime + dur; return;
-                    case PowerupDef.OverlapPolicy.Replace: EndMagnet(); break;
-                }
-            }
-            _magActive = true; _magDef = def; _magEnd = Time.unscaledTime + dur;
-            GameEvents.RaisePowerupStarted(def);
-        }
-        void EndMagnet()
-        {
-            if (!_magActive) return;
-            _magActive = false; GameEvents.RaisePowerupEnded(_magDef); _magDef = null;
-        }
-
-        // ---------- Shield ----------
-        void ApplyShield(PowerupDef def)
-        {
-            _shieldActive = true; _shieldDef = def;
-            _shieldEnd = Time.unscaledTime + Mathf.Max(0f, def.duration); // 0 = until used
-            GameEvents.RaisePowerupStarted(def);
-        }
-        public static void ConsumeShield() => Instance?.EndShield();
-        void EndShield()
-        {
-            if (!_shieldActive) return;
-            _shieldActive = false; GameEvents.RaisePowerupEnded(_shieldDef); _shieldDef = null;
-        }
-
-        // ---------- Clear Screen (award points + clear) ----------
-        void DoClearScreen(PowerupDef def)
-        {
             GameEvents.RaisePowerupStarted(def);
 
-            int baseTotal = 0;
+            _preFreezeScale = (Time.timeScale <= 0f) ? 1f : Time.timeScale;
+            _freezeActive = true;
+            Time.timeScale = scale;
 
-            if (Fruit.Active.Count > 0)
+            float t = 0f;
+            while (t < dur)
             {
-                var list = new System.Collections.Generic.List<Fruit>(Fruit.Active);
-                foreach (var f in list)
-                {
-                    if (!f || f.data == null) continue;
-                    if (!f.data.isBomb)
-                        baseTotal += Mathf.Max(0, f.data.scoreValue);
-                    Destroy(f.gameObject);
-                }
-            }
-            else
-            {
-                var fruits = FindObjectsByType<Fruit>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-                foreach (var f in fruits)
-                {
-                    if (!f || f.data == null) continue;
-                    if (!f.data.isBomb)
-                        baseTotal += Mathf.Max(0, f.data.scoreValue);
-                    Destroy(f.gameObject);
-                }
+                t += Time.unscaledDeltaTime; // ignore timeScale
+                yield return null;
             }
 
-            if (baseTotal > 0)
-                ScoreManager.Instance?.AddBulkPoints(baseTotal);
+            if (_freezeActive) Time.timeScale = 1f;
+            _freezeActive = false;
 
             GameEvents.RaisePowerupEnded(def);
         }
 
-        // ---------- Utility ----------
-        void ClearAll()
+        // ---------------- Score Multiplier ----------------
+        IEnumerator RunScoreMultiplier(PowerupDef def)
         {
-            EndTimeScale();
-            EndScoreMultiplier();
-            EndMagnet();
-            EndShield();
+            float dur = (def.duration > 0f) ? def.duration : defaultScoreDur;
+
+            GameEvents.RaisePowerupStarted(def);
+            // ScoreManager should listen to Started/Ended to apply/remove the multiplier itself.
+
+            float t = 0f;
+            while (t < dur)
+            {
+                t += Time.unscaledDeltaTime;
+                yield return null;
+            }
+
+            GameEvents.RaisePowerupEnded(def);
+        }
+
+        // ---------------- Magnet ----------------
+        IEnumerator RunMagnet(PowerupDef def)
+        {
+            float dur = (def.duration > 0f) ? def.duration : defaultMagnetDur;
+
+            MagnetRadius = Mathf.Max(0.01f, defaultMagnetRadius);
+            MagnetPullSpeed = Mathf.Max(0.01f, defaultMagnetPull);
+            MagnetActive = true;
+
+            GameEvents.RaisePowerupStarted(def);
+
+            float t = 0f;
+            while (t < dur)
+            {
+                if (!PlayerTransform)
+                {
+                    var go = GameObject.FindGameObjectWithTag("Player");
+                    PlayerTransform = go ? go.transform : null;
+                }
+                t += Time.unscaledDeltaTime;
+                yield return null;
+            }
+
+            MagnetActive = false;
+            GameEvents.RaisePowerupEnded(def);
+        }
+
+        // ---------------- Shield ----------------
+        void RunShield(PowerupDef def)
+        {
+            ShieldActive = true;
+            _shieldDef = def;
+
+            float dur = (def.duration > 0f) ? def.duration : defaultShieldDur;
+            _shieldTimed = dur > 0f;
+
+            GameEvents.RaisePowerupStarted(def);
+
+            if (_shieldTimed) StartCoroutine(ShieldTimer(dur));
+        }
+
+        IEnumerator ShieldTimer(float duration)
+        {
+            float t = 0f;
+            while (t < duration && ShieldActive)
+            {
+                t += Time.unscaledDeltaTime;
+                yield return null;
+            }
+
+            if (ShieldActive)
+            {
+                ShieldActive = false;
+                if (_shieldDef != null) GameEvents.RaisePowerupEnded(_shieldDef);
+                _shieldDef = null;
+                _shieldTimed = false;
+            }
+        }
+
+        /// <summary>
+        /// Called by gameplay (e.g., LifeManager) when a bomb would cost a life.
+        /// Returns true if shield absorbed it. If shield was "until-consumed", it turns off.
+        /// </summary>
+        public static bool ConsumeShield()
+        {
+            if (!ShieldActive || Instance == null) return false;
+
+            if (!Instance._shieldTimed)
+            {
+                ShieldActive = false;
+                if (Instance._shieldDef != null) GameEvents.RaisePowerupEnded(Instance._shieldDef);
+                Instance._shieldDef = null;
+            }
+            return true;
+        }
+
+        // ---------------- Clear Screen ----------------
+        IEnumerator RunClear(PowerupDef def)
+        {
+            GameEvents.RaisePowerupStarted(def);
+
+            int total = 0;
+            var snapshot = new List<Fruit>();
+
+            if (Fruit.Active.Count > 0)
+            {
+                foreach (var f in Fruit.Active)
+                    if (f) snapshot.Add(f);
+            }
+            else
+            {
+                var fruits = FindObjectsByType<Fruit>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+                for (int i = 0; i < fruits.Length; i++)
+                    if (fruits[i]) snapshot.Add(fruits[i]);
+            }
+
+            // sum points (non-bomb)
+            for (int i = 0; i < snapshot.Count; i++)
+            {
+                var f = snapshot[i];
+                if (f && f.data && !f.data.isBomb) total += f.data.scoreValue;
+            }
+
+            // award once
+            try { ScoreManager.Instance?.AddBulkPoints(total); } catch { }
+
+            // retire all (no extra triggers)
+            for (int i = 0; i < snapshot.Count; i++)
+            {
+                var f = snapshot[i];
+                if (f) f.Retire();
+            }
+
+            yield return null;
+            GameEvents.RaisePowerupEnded(def);
         }
     }
 }

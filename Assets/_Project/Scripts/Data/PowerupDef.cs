@@ -35,8 +35,8 @@ namespace CatchTheFruit
         [Header("Params by Kind")]
         [Range(0.05f, 1f)] public float timeScale = 0.2f;  // TimeScale
         [Min(1f)] public float scoreMultiplier = 2f;       // ScoreMultiplier
-        [Min(0f)] public float magnetRadius = 5f;          // Magnet (world units)
-        [Min(0f)] public float magnetPullSpeed = 12f;      // Magnet (units/sec)
+        [Min(0f)] public float magnetRadius = 6f;          // Magnet (world units)
+        [Min(0f)] public float magnetPullSpeed = 20f;      // Magnet (units/sec)
     }
 }
 /*

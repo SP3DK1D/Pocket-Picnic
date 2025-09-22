@@ -177,6 +177,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   data: {fileID: 0}
   fallSpeed: 0
-  initialDownBoost: 0
+  initialDownBoost: 1
   maxFallSpeed: 10
   gravityScaleOverride: 0
+  angularVelRange: {x: 80, y: 220}
+  torqueImpulseRange: {x: 0.02, y: 0.08}
+  angularDragRange: {x: 0.12, y: 0.28}
+  randomizeInitialRotation: 1
