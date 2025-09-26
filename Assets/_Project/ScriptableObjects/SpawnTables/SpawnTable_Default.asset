@@ -26,12 +26,12 @@ MonoBehaviour:
   - fruit: {fileID: 11400000, guid: 3003af0a5142b254eb3ec03232230d6a, type: 2}
     weight: 0.5
   - fruit: {fileID: 11400000, guid: 1574c991311c73f4ab87400fdd7fa5bc, type: 2}
-    weight: 0.2
+    weight: 0.4
   - fruit: {fileID: 11400000, guid: 5b6820f6048d9d84e9224dd098e64d15, type: 2}
-    weight: 1
+    weight: 3
   - fruit: {fileID: 11400000, guid: ab6acfe372c8faf49bc825b2d2233ecc, type: 2}
     weight: 2
   initialInterval: 1
-  intervalDecay: 0.97
+  intervalDecay: 0.80947864
   minInterval: 0.35
   fallSpeedMultiplier: 0.1

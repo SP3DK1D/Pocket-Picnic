@@ -11,7 +11,7 @@ namespace CatchTheFruit
     /// - Soft lanes + anti-clump
     /// - Continuous ramp (spawn interval + fall speed)
     /// - Optional camera-width bounds (auto-fit aspect ratio)
-    /// - ChallengeDirector bias (BananaBlitz/BombStorm/GoldenTime)
+    /// - ChallengeDirector bias (if present)
     /// - Pooling-safe clears and stall-proof spawn loop
     /// </summary>
     public class FruitSpawner : MonoBehaviour
@@ -62,12 +62,20 @@ namespace CatchTheFruit
         private float _speedOverride = 1f;        // multiplies table.fallSpeedMultiplier
         private float _intervalMulOverride = 1f;  // scales initial/min intervals
 
-        // ---------- Public API for Difficulty/Wave systems ----------
+        // ---------- Public API ----------
         public void SetSpawnTable(SpawnTable table) => spawnTable = table;
         public void SetSpeedMultiplier(float m) => _speedOverride = Mathf.Max(0.5f, m);
         public void SetIntervalMultiplier(float m) => _intervalMulOverride = Mathf.Clamp(m, 0.5f, 1.5f);
 
-        // ---------- Lifecycle ----------
+        // Hard stop + clear (used when exiting to menu)
+        public void StopAndClear()
+        {
+            _running = false;
+            StopAllCoroutines();
+            ClearExistingFruits();
+            if (verboseLogs) Debug.Log("[Spawner] StopAndClear() called.");
+        }
+
         private void OnEnable()
         {
             GameEvents.OnGameStart += StartRun;
@@ -89,7 +97,6 @@ namespace CatchTheFruit
             if (!fruitPrefab) Debug.LogWarning("[Spawner] Missing Fruit prefab (used if FruitPool absent).", this);
         }
 
-        // ---------- Start/Stop ----------
         private void StartRun()
         {
             if (!config || !spawnTable)
@@ -125,10 +132,9 @@ namespace CatchTheFruit
             if (verboseLogs) Debug.Log("[Spawner] STOP (cleared).");
         }
 
-        // ---------- Main Loop ----------
         private IEnumerator SpawnLoop()
         {
-            const float MIN_WAIT = 0.02f; // safety lower bound (avoids stalls with extreme decays/Freeze)
+            const float MIN_WAIT = 0.02f;
             while (_running)
             {
                 SpawnOne();
@@ -141,34 +147,28 @@ namespace CatchTheFruit
                 float min = Mathf.Max(0.08f, spawnTable.minInterval * _intervalMulOverride);
                 _interval = Mathf.Max(min, _interval * spawnTable.intervalDecay);
 
-                // Guard against invalid values
                 if (!float.IsFinite(_interval)) _interval = min;
             }
         }
 
-        // ---------- Spawn One ----------
         private void SpawnOne()
         {
-            // 1) Pick a FruitData from table
             var fd = spawnTable.Pick();
             if (!fd) return;
 
-            // 2) Challenge bias (if a director is active)
+            // Optional challenge bias
             var cd = Object.FindFirstObjectByType<ChallengeDirector>();
             if (cd) fd = cd.BiasPick(fd, spawnTable);
 
-            // 3) Compute bounds (half width)
             float halfWidth = ComputeHalfWidth();
             float left = -halfWidth + edgeMargin;
             float right = halfWidth - edgeMargin;
-            if (left > right) { left = right = 0f; } // extreme margin case
+            if (left > right) { left = right = 0f; }
 
-            // 4) Soft lanes + anti-clump
             float laneW = (halfWidth * 2f) / Mathf.Max(1, laneCount - 1);
             int lane = URandom.Range(0, Mathf.Max(1, laneCount));
             float x = -halfWidth + lane * laneW;
 
-            // Prevent repeating (or nearly repeating) last X
             if (Mathf.Abs(x - _lastSpawnX) < Mathf.Max(minLaneSeparation, laneW * 0.45f))
             {
                 x += (URandom.value < 0.5f ? -1f : 1f) * laneW;
@@ -178,43 +178,29 @@ namespace CatchTheFruit
 
             float y = config.spawnY + (spawnYJitter > 0f ? URandom.Range(-spawnYJitter, spawnYJitter) : 0f);
 
-            // 5) Create fruit (pool first, else instantiate)
             Fruit fruit;
-            if (FruitPool.Instance)
-                fruit = FruitPool.Instance.Spawn(new Vector3(x, y, 0f), Quaternion.identity);
-            else
-                fruit = Instantiate(fruitPrefab, new Vector3(x, y, 0f), Quaternion.identity);
+            if (FruitPool.Instance) fruit = FruitPool.Instance.Spawn(new Vector3(x, y, 0f), Quaternion.identity);
+            else fruit = Instantiate(fruitPrefab, new Vector3(x, y, 0f), Quaternion.identity);
 
             if (!fruit) return;
 
-            // 6) Compute speed multiplier (table * runtime override * optional DifficultyManager scaling)
             float speedMul = spawnTable.fallSpeedMultiplier * _speedOverride;
+            fruit.Init(fd, speedMul, config.groundY, decorative: false);
 
-            // If you have DifficultyManager with dynamic scaling, optionally apply here:
-            // if (DifficultyManager.HasCurrent) speedMul *= DifficultyManager.GetFallSpeedMultiplier();
-
-            fruit.Init(fd, speedMul, config.groundY);
-
-            // 7) Continuous ramp every N spawns
+            // Continuous ramp every N spawns
             _spawnCounter++;
             if (_spawnCounter % Mathf.Max(1, rampEveryNSpawns) == 0)
             {
-                // Slightly increase spawn rate (decay steeper)
                 spawnTable.intervalDecay = Mathf.Clamp01(spawnTable.intervalDecay * decayStep);
-                // Slightly increase fall speed (runtime override)
                 _speedOverride *= fallSpeedRamp;
 
                 if (verboseLogs)
-                {
                     Debug.Log($"[Spawner] Ramp @{_spawnCounter} → decay={spawnTable.intervalDecay:0.000}, speedOverride={_speedOverride:0.000}");
-                }
 
-                // Optional: wave toast
                 GameEvents.RaiseWaveMessage("⚡ Speeding up!", 1.4f);
             }
         }
 
-        // ---------- Helpers ----------
         private float ComputeHalfWidth()
         {
             if (!useCameraWidth || Camera.main == null || !Camera.main.orthographic)
@@ -240,7 +226,6 @@ namespace CatchTheFruit
                 return;
             }
 
-            // Fallback search
             var fruits = FindObjectsByType<Fruit>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
             for (int i = 0; i < fruits.Length; i++)
             {

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66ce5d6af6fe2d14c9f6ba60bb453a0d, type: 3}
   m_Name: GameConfig_Default
   m_EditorClassIdentifier: 
-  startingLives: 5
+  startingLives: 3
   arenaHalfWidth: 3
   spawnY: 7
   groundY: -7

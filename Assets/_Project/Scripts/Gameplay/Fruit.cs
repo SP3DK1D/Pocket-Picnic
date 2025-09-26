@@ -11,7 +11,7 @@ namespace CatchTheFruit
     /// - Random tumbling (per-instance)
     /// - Magnet homing when active (PowerupManager)
     /// - Safe despawn via Retire() for catch/miss/clear (pooling friendly)
-    /// - Pool reset in Init() (re-enables collider/physics/sprite)
+    /// - Decorative mode for menu rain (no scoring/lives)
     /// Optional integrations:
     /// - DifficultyManager for gravity/terminal settings
     /// - ChallengeDirector for GoldenTime bonus/tint on catch
@@ -28,7 +28,11 @@ namespace CatchTheFruit
 
         [Header("Runtime (assigned by spawner)")]
         public FruitData data;          // what this fruit is
-        public float fallSpeed;     // debugging only (physics drives actual fall)
+        public float fallSpeed;     // debug-only (physics drives actual fall)
+
+        [Header("Decorative")]
+        [Tooltip("When true (menu rain), fruit does not affect score/lives and triggers no power-ups.")]
+        public bool decorative = false;
 
         [Header("Physics Feel")]
         [Tooltip("Initial downward velocity given at spawn (world u/s).")]
@@ -69,10 +73,11 @@ namespace CatchTheFruit
         void OnDisable() { Active.Remove(this); }
 
         /// <summary>Called by spawner after instantiation (or recycle) to re-seed state.</summary>
-        public void Init(FruitData fd, float speedMultiplier, float groundY)
+        public void Init(FruitData fd, float speedMultiplier, float groundY, bool decorative = false)
         {
             data = fd;
             _groundY = groundY;
+            this.decorative = decorative;
 
             // ----- POOL RESET (critical!) -----
             if (_col) _col.enabled = true;       // re-enable trigger collider (prevents "ghost" fruits)
@@ -103,7 +108,7 @@ namespace CatchTheFruit
 
             if (gravityScaleOverride > 0f) _rb.gravityScale = gravityScaleOverride;
 
-            if (DifficultyManager.HasCurrent)
+            if (DifficultyManager.HasCurrent && !decorative)
             {
                 var d = DifficultyManager.Current;
                 if (d.gravityScale > 0f) _rb.gravityScale = d.gravityScale;
@@ -139,7 +144,7 @@ namespace CatchTheFruit
             if (_retiring) return;
 
             // ---------- Magnet homing (fruits only; bombs are ignored) ----------
-            if (!data.isBomb && PowerupManager.MagnetActive && PowerupManager.PlayerTransform)
+            if (!decorative && !data.isBomb && PowerupManager.MagnetActive && PowerupManager.PlayerTransform)
             {
                 Vector2 to = (Vector2)PowerupManager.PlayerTransform.position - _rb.position;
                 float dist = to.magnitude;
@@ -176,8 +181,11 @@ namespace CatchTheFruit
             // Ground line miss
             if (transform.position.y <= _groundY)
             {
-                bool isPowerup = data.powerup != null;
-                GameEvents.RaiseFruitMissed(data.id, data.isBomb, isPowerup);
+                if (!decorative)
+                {
+                    bool isPowerup = data.powerup != null;
+                    GameEvents.RaiseFruitMissed(data.id, data.isBomb, isPowerup);
+                }
                 Retire();
             }
         }
@@ -185,6 +193,13 @@ namespace CatchTheFruit
         void OnTriggerEnter2D(Collider2D other)
         {
             if (_retiring || !other.CompareTag("Player")) return;
+
+            if (decorative)
+            {
+                // In menu mode: just disappear
+                Retire();
+                return;
+            }
 
             // Score / events
             GameEvents.RaiseFruitCaught(data.id, data.scoreValue, data.isBomb);
