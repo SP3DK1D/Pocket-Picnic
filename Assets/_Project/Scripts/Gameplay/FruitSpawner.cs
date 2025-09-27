@@ -1,81 +1,45 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
-// Alias Unity's Random to avoid clashes with System.Random
+// Use Unity's Random explicitly to avoid clashes with System.Random
 using URandom = UnityEngine.Random;
 
 namespace CatchTheFruit
 {
     /// <summary>
-    /// Spawns Fruit using a SpawnTable with:
-    /// - Soft lanes + anti-clump
-    /// - Continuous ramp (spawn interval + fall speed)
-    /// - Optional camera-width bounds (auto-fit aspect ratio)
-    /// - ChallengeDirector bias (if present)
-    /// - Pooling-safe clears and stall-proof spawn loop
+    /// Spawns Fruit using a SpawnTable. Supports external overrides (waves),
+    /// clears all fruits on GameStart and GameOver, and uses Unity 6 APIs.
+    /// KISS: one job—spawn fruits at an interval that decays over time.
     /// </summary>
     public class FruitSpawner : MonoBehaviour
     {
         [Header("Required")]
-        [SerializeField] private GameConfig config;        // arena bounds (fallback if camera-width off)
-        [SerializeField] private SpawnTable spawnTable;    // weighted fruit list + pacing
-        [SerializeField] private Fruit fruitPrefab;   // used if FruitPool absent
+        [SerializeField] private GameConfig config;       // arena sizes, spawn/ground Y
+        [SerializeField] private SpawnTable spawnTable;   // weighted fruit list + pacing
+        [SerializeField] private Fruit fruitPrefab;       // the Fruit MonoBehaviour prefab
 
-        [Header("Spawn Bounds")]
-        [Tooltip("If ON, compute half-width from Camera.main.orthographicSize * aspect.")]
-        [SerializeField] private bool useCameraWidth = true;
-        [Tooltip("If ON, clamp camera width to config.arenaHalfWidth when camera is wider.")]
-        [SerializeField] private bool capToConfigWidth = true;
-        [Tooltip("Keep fruits a little away from screen edges.")]
-        [Min(0f)][SerializeField] private float edgeMargin = 0.12f;
-
-        [Header("Lanes & Anti-clump")]
-        [Tooltip("Number of soft lanes across the width. 5–7 works well.")]
-        [SerializeField] private int laneCount = 5;
-        [Tooltip("Minimum horizontal distance from previous spawn X.")]
-        [SerializeField] private float minLaneSeparation = 0.55f;
-        [Tooltip("Small random vertical offset to avoid perfect lines.")]
-        [Range(0f, 0.6f)][SerializeField] private float spawnYJitter = 0.12f;
-
-        [Header("Timing")]
-        [Tooltip("Adds small randomness to each interval (+/-).")]
-        [Range(0f, 0.25f)][SerializeField] private float intervalJitter = 0.06f;
-
-        [Header("Continuous Ramp")]
-        [Tooltip("Every N spawns, apply a small ramp.")]
-        [Min(1)][SerializeField] private int rampEveryNSpawns = 25;
-        [Tooltip("Each ramp multiplies SpawnTable.intervalDecay by this (e.g., 0.99).")]
-        [Range(0.85f, 1.0f)][SerializeField] private float decayStep = 0.99f;
-        [Tooltip("Each ramp multiplies our runtime fall-speed override (e.g., 1.04).")]
-        [Range(1.0f, 1.2f)][SerializeField] private float fallSpeedRamp = 1.04f;
+        [Header("Tuning")]
+        [Tooltip("Global multiplier applied to ALL fruits’ fall speeds.")]
+        [Min(0.25f)] public float globalFallSpeed = 1.6f;     // <-- speed booster
+        [Tooltip("Prevent board flood: skip spawns if this many fruits are alive.")]
+        [Min(1)] public int maxAlive = 20;                    // <-- spawn limiter
 
         [Header("Debug")]
+        [Tooltip("Verbose logs (spawn starts, clears, warnings).")]
         [SerializeField] private bool verboseLogs = false;
 
-        // ---------- Runtime ----------
-        private float _interval;                  // current spawn interval
+        // Runtime
+        private float _interval;
         private bool _running;
-        private int _spawnCounter;
-        private float _lastSpawnX = 999f;
 
-        // External overrides (Difficulty/Waves)
+        // External overrides (WaveDirector can set these)
         private float _speedOverride = 1f;        // multiplies table.fallSpeedMultiplier
-        private float _intervalMulOverride = 1f;  // scales initial/min intervals
+        private float _intervalMulOverride = 1f;  // multiplies initial/min intervals
 
-        // ---------- Public API ----------
+        // ---------- Public API for WaveDirector ----------
         public void SetSpawnTable(SpawnTable table) => spawnTable = table;
         public void SetSpeedMultiplier(float m) => _speedOverride = Mathf.Max(0.5f, m);
-        public void SetIntervalMultiplier(float m) => _intervalMulOverride = Mathf.Clamp(m, 0.5f, 1.5f);
+        public void SetIntervalMultiplier(float m) => _intervalMulOverride = Mathf.Clamp(m, 0.5f, 1.2f);
 
-        // Hard stop + clear (used when exiting to menu)
-        public void StopAndClear()
-        {
-            _running = false;
-            StopAllCoroutines();
-            ClearExistingFruits();
-            if (verboseLogs) Debug.Log("[Spawner] StopAndClear() called.");
-        }
-
+        // ---------- Lifecycle ----------
         private void OnEnable()
         {
             GameEvents.OnGameStart += StartRun;
@@ -94,32 +58,27 @@ namespace CatchTheFruit
         {
             if (!config) Debug.LogWarning("[Spawner] Missing GameConfig reference.", this);
             if (!spawnTable) Debug.LogWarning("[Spawner] Missing SpawnTable reference.", this);
-            if (!fruitPrefab) Debug.LogWarning("[Spawner] Missing Fruit prefab (used if FruitPool absent).", this);
+            if (!fruitPrefab) Debug.LogWarning("[Spawner] Missing Fruit prefab reference.", this);
         }
 
+        // ---------- Run control ----------
         private void StartRun()
         {
-            if (!config || !spawnTable)
+            if (!config || !spawnTable || !fruitPrefab)
             {
-                Debug.LogWarning("[Spawner] Cannot start: assign Config + SpawnTable (+ Fruit prefab or FruitPool).", this);
+                Debug.LogWarning("[Spawner] Cannot start: assign Config, SpawnTable, and Fruit prefab.", this);
                 return;
             }
 
-            ClearExistingFruits(); // fresh board
+            // Safety: if a previous Freeze left timeScale < 1, reset it
+            Time.timeScale = 1f;
 
-            // Reset counters
-            _spawnCounter = 0;
-            _lastSpawnX = 999f;
-
-            // Initialize interval from table (scaled by override)
-            _interval = Mathf.Max(0.08f, spawnTable.initialInterval * _intervalMulOverride);
+            ClearExistingFruits(); // clean slate on new run
+            _interval = Mathf.Max(0.05f, spawnTable.initialInterval * _intervalMulOverride);
             _running = true;
 
             if (verboseLogs)
-            {
-                float hw = ComputeHalfWidth();
-                Debug.Log($"[Spawner] START  interval={_interval:0.00}s  min={spawnTable.minInterval * _intervalMulOverride:0.00}s  decay={spawnTable.intervalDecay:0.000}  speedMul={spawnTable.fallSpeedMultiplier * _speedOverride:0.##}  halfW={hw:0.00}");
-            }
+                Debug.Log($"[Spawner] Start. interval={_interval:0.00}s, min={spawnTable.minInterval * _intervalMulOverride:0.00}s, speedMul={(spawnTable.fallSpeedMultiplier * _speedOverride * globalFallSpeed):0.##}");
 
             StartCoroutine(SpawnLoop());
         }
@@ -128,112 +87,64 @@ namespace CatchTheFruit
         {
             _running = false;
             StopAllCoroutines();
-            ClearExistingFruits();
-            if (verboseLogs) Debug.Log("[Spawner] STOP (cleared).");
+            ClearExistingFruits(); // also clear on lose/menu
+            if (verboseLogs) Debug.Log("[Spawner] Stopped and cleared.");
         }
 
-        private IEnumerator SpawnLoop()
+        /// <summary>Public method expected by menu/UI scripts. Stops spawning and clears immediately.</summary>
+        public void StopAndClear() => StopRun();
+
+        private System.Collections.IEnumerator SpawnLoop()
         {
-            const float MIN_WAIT = 0.02f;
+            // Uses scaled time so Freeze slows spawns (feels cohesive).
             while (_running)
             {
-                SpawnOne();
+                // Limit concurrent fruits
+                if (Fruit.Active.Count < maxAlive)
+                {
+                    SpawnOne();
+                }
+                // wait between checks (even if we skipped)
+                yield return new WaitForSeconds(_interval);
 
-                float jitter = (intervalJitter > 0f) ? URandom.Range(-intervalJitter, intervalJitter) : 0f;
-                float wait = Mathf.Max(MIN_WAIT, _interval + jitter);
-                yield return new WaitForSeconds(wait); // scaled → Freeze slows spawns (nice cohesion)
-
-                // Decay interval toward min (both respect interval override)
-                float min = Mathf.Max(0.08f, spawnTable.minInterval * _intervalMulOverride);
+                // Decay toward min (both scaled by _intervalMulOverride)
+                float min = spawnTable.minInterval * _intervalMulOverride;
                 _interval = Mathf.Max(min, _interval * spawnTable.intervalDecay);
-
-                if (!float.IsFinite(_interval)) _interval = min;
             }
         }
 
+        // ---------- Spawn ----------
         private void SpawnOne()
         {
             var fd = spawnTable.Pick();
             if (!fd) return;
 
-            // Optional challenge bias
-            var cd = Object.FindFirstObjectByType<ChallengeDirector>();
-            if (cd) fd = cd.BiasPick(fd, spawnTable);
+            float x = URandom.Range(-config.arenaHalfWidth, config.arenaHalfWidth);
+            float y = config.spawnY;
 
-            float halfWidth = ComputeHalfWidth();
-            float left = -halfWidth + edgeMargin;
-            float right = halfWidth - edgeMargin;
-            if (left > right) { left = right = 0f; }
+            var f = Instantiate(fruitPrefab, new Vector3(x, y, 0f), Quaternion.identity);
 
-            float laneW = (halfWidth * 2f) / Mathf.Max(1, laneCount - 1);
-            int lane = URandom.Range(0, Mathf.Max(1, laneCount));
-            float x = -halfWidth + lane * laneW;
+            // Final speed multiplier now includes globalFallSpeed
+            float speedMul = spawnTable.fallSpeedMultiplier * _speedOverride * globalFallSpeed;
+            f.Init(fd, speedMul, config.groundY);
 
-            if (Mathf.Abs(x - _lastSpawnX) < Mathf.Max(minLaneSeparation, laneW * 0.45f))
-            {
-                x += (URandom.value < 0.5f ? -1f : 1f) * laneW;
-            }
-            x = Mathf.Clamp(x, left, right);
-            _lastSpawnX = x;
-
-            float y = config.spawnY + (spawnYJitter > 0f ? URandom.Range(-spawnYJitter, spawnYJitter) : 0f);
-
-            Fruit fruit;
-            if (FruitPool.Instance) fruit = FruitPool.Instance.Spawn(new Vector3(x, y, 0f), Quaternion.identity);
-            else fruit = Instantiate(fruitPrefab, new Vector3(x, y, 0f), Quaternion.identity);
-
-            if (!fruit) return;
-
-            float speedMul = spawnTable.fallSpeedMultiplier * _speedOverride;
-            fruit.Init(fd, speedMul, config.groundY, decorative: false);
-
-            // Continuous ramp every N spawns
-            _spawnCounter++;
-            if (_spawnCounter % Mathf.Max(1, rampEveryNSpawns) == 0)
-            {
-                spawnTable.intervalDecay = Mathf.Clamp01(spawnTable.intervalDecay * decayStep);
-                _speedOverride *= fallSpeedRamp;
-
-                if (verboseLogs)
-                    Debug.Log($"[Spawner] Ramp @{_spawnCounter} → decay={spawnTable.intervalDecay:0.000}, speedOverride={_speedOverride:0.000}");
-
-                GameEvents.RaiseWaveMessage("⚡ Speeding up!", 1.4f);
-            }
+            if (verboseLogs) Debug.Log($"[Spawner] + {fd.id} at x={x:0.00}, speedMul={speedMul:0.##}, alive={Fruit.Active.Count}");
         }
 
-        private float ComputeHalfWidth()
-        {
-            if (!useCameraWidth || Camera.main == null || !Camera.main.orthographic)
-                return config ? config.arenaHalfWidth : 3.2f;
-
-            float camHalf = Camera.main.orthographicSize * Camera.main.aspect;
-            if (capToConfigWidth && config) return Mathf.Min(config.arenaHalfWidth, camHalf);
-            return camHalf;
-        }
-
+        // ---------- Clear ----------
         private void ClearExistingFruits()
         {
             if (Fruit.Active.Count > 0)
             {
-                var list = new List<Fruit>(Fruit.Active);
+                var list = new System.Collections.Generic.List<Fruit>(Fruit.Active);
                 for (int i = 0; i < list.Count; i++)
-                {
-                    var f = list[i];
-                    if (!f) continue;
-                    if (FruitPool.Instance) FruitPool.Instance.Recycle(f);
-                    else Destroy(f.gameObject);
-                }
+                    if (list[i]) Destroy(list[i].gameObject);
                 return;
             }
 
             var fruits = FindObjectsByType<Fruit>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
             for (int i = 0; i < fruits.Length; i++)
-            {
-                var f = fruits[i];
-                if (!f) continue;
-                if (FruitPool.Instance) FruitPool.Instance.Recycle(f);
-                else Destroy(f.gameObject);
-            }
+                if (fruits[i]) Destroy(fruits[i].gameObject);
         }
     }
 }

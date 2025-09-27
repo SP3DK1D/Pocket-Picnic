@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using TMPro;
 using UnityEngine;
 using static CatchTheFruit.GameEvents;
@@ -119,6 +120,9 @@ namespace CatchTheFruit
         {
             if (mode != Mode.Banner) return;
 
+            // Sanitize message against the assigned TMP font to avoid "missing glyph boxes"
+            message = CleanForFont(_txt, message);
+
             // de-duplicate repeated calls (same message within short window)
             if (_lastMsg == message && (Time.unscaledTime - _lastMsgTime) < dedupeSeconds)
                 return;
@@ -128,6 +132,27 @@ namespace CatchTheFruit
 
             _bnQueue.Enqueue((message, Mathf.Max(0.05f, seconds + bn_pad)));
             if (_bnRunner == null) _bnRunner = StartCoroutine(RunBanner());
+        }
+
+        // Remove unsupported glyphs (e.g., ⚡) & control chars so TMP doesn't render a □ box.
+        static string CleanForFont(TMP_Text text, string s)
+        {
+            if (string.IsNullOrEmpty(s) || text == null || text.font == null) return s?.Trim() ?? "";
+            var font = text.font;
+
+            var sb = new StringBuilder(s.Length);
+            foreach (var ch in s)
+            {
+                // skip control chars and common “emoji variation” markers that show as boxes
+                if (char.IsControl(ch)) continue;
+                if (ch == '\uFE0F' || ch == '\u200D' || ch == '\uFFFD') continue; // VS16, ZWJ, replacement char
+
+                // keep only characters present in this font (inc. its fallbacks)
+                if (font.HasCharacter(ch))
+                    sb.Append(ch);
+                // else drop it (this removes ⚡ if unsupported)
+            }
+            return sb.ToString().Trim();
         }
 
         // =======================================================
