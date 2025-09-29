@@ -22,29 +22,35 @@ namespace CatchTheFruit
         [SerializeField] private float intervalMax = 0.85f;
         [SerializeField] private float fallSpeedMul = 0.9f; // slightly calmer than gameplay
         [SerializeField] private bool useCameraWidth = true;
-        [SerializeField] private float edgeMargin = 0.15f;
+        [SerializeField] private float edgeMargin = 0.15f;  // inward margin from each screen edge (world units)
         [SerializeField] private int laneCount = 5;
 
         [Header("Content Filter")]
         [SerializeField] private bool excludeBombsAndPowerups = true;
 
-        Coroutine _loop;
-        float _lastX = 999f;
+        [Header("Despawn")]
+        [SerializeField] private float despawnBelowMargin = 0.5f;  // how far below screen before despawn
+        [SerializeField] private float maxFruitLifetime = 20f;     // safety cap (seconds, unscaled)
 
-        void OnEnable()
+        private Coroutine _loop;
+        private float _lastX = 999f;
+
+        private void OnEnable()
         {
             if (_loop == null) _loop = StartCoroutine(SpawnLoop());
         }
-        void OnDisable()
+
+        private void OnDisable()
         {
             if (_loop != null) StopCoroutine(_loop);
             _loop = null;
             ClearDecorativeOnly();
         }
 
-        IEnumerator SpawnLoop()
+        private IEnumerator SpawnLoop()
         {
-            yield return null; // let UI settle first
+            // let UI settle first
+            yield return null;
 
             while (true)
             {
@@ -54,56 +60,108 @@ namespace CatchTheFruit
             }
         }
 
-        void SpawnOneDecorative()
+        private void SpawnOneDecorative()
         {
             if (!config || !spawnTable || !fruitPrefab) return;
 
-            var fd = spawnTable.Pick();
+            FruitData fd = spawnTable.Pick();
             if (!fd) return;
 
             if (excludeBombsAndPowerups && (fd.isBomb || fd.powerup))
             {
                 // try one more pick; if still unsuitable, skip this frame
-                var retry = spawnTable.Pick();
+                FruitData retry = spawnTable.Pick();
                 if (!retry || retry.isBomb || retry.powerup) return;
                 fd = retry;
             }
 
-            float halfW = ComputeHalfWidth();
+            float halfW = ComputeHalfWidthClampedToCamera();   // <-- camera-based X span (with margin)
+            float innerMargin = Mathf.Abs(edgeMargin);
+
+            // Lanes across the visible span (already margin'd)
             float laneW = (halfW * 2f) / Mathf.Max(1, laneCount - 1);
             int lane = URandom.Range(0, Mathf.Max(1, laneCount));
             float x = -halfW + lane * laneW;
 
+            // Avoid repeating nearly the same lane twice in a row
             if (Mathf.Abs(x - _lastX) < laneW * 0.4f)
             {
                 x += (URandom.value < 0.5f ? -1f : 1f) * laneW;
-                x = Mathf.Clamp(x, -halfW + edgeMargin, halfW - edgeMargin);
+                x = Mathf.Clamp(x, -halfW + innerMargin * 0.25f, halfW - innerMargin * 0.25f);
             }
             _lastX = x;
 
             float y = config.spawnY + URandom.Range(-0.05f, 0.05f);
 
-            var fruit = Instantiate(fruitPrefab, new Vector3(x, y, 0f), Quaternion.identity);
+            Fruit fruit = Instantiate(fruitPrefab, new Vector3(x, y, 0f), Quaternion.identity);
             fruit.Init(fd, fallSpeedMul, config.groundY, decorative: true);
+
+            // Inline auto-despawn: kill decorative fruits once below the screen bottom (or after a max lifetime)
+            float cutoffY = ComputeDespawnY();
+            StartCoroutine(CoAutoDespawn(fruit.gameObject, cutoffY, maxFruitLifetime));
         }
 
-        float ComputeHalfWidth()
+        /// <summary>
+        /// Returns the half-width for spawning. If useCameraWidth is ON and there is a valid
+        /// orthographic Camera.main, returns (cameraHalfWidth - edgeMargin). Otherwise falls
+        /// back to config.arenaHalfWidth (also minus margin).
+        /// </summary>
+        private float ComputeHalfWidthClampedToCamera()
         {
-            if (!useCameraWidth || !Camera.main || !Camera.main.orthographic)
-                return config ? config.arenaHalfWidth : 3.2f;
+            float margin = Mathf.Abs(edgeMargin);
+            Camera cam = Camera.main;
 
-            float camHalf = Camera.main.orthographicSize * Camera.main.aspect;
-            if (config) return Mathf.Min(config.arenaHalfWidth, camHalf);
-            return camHalf;
+            if (useCameraWidth && cam && cam.orthographic)
+            {
+                float camHalf = cam.orthographicSize * cam.aspect;
+                return Mathf.Max(0.1f, camHalf - margin);
+            }
+
+            // Fallback to config-defined arena width (still respect margin)
+            float cfgHalf = (config ? config.arenaHalfWidth : 3.2f);
+            return Mathf.Max(0.1f, cfgHalf - margin);
         }
 
-        void ClearDecorativeOnly()
+        private float ComputeDespawnY()
+        {
+            Camera cam = Camera.main;
+            if (cam && cam.orthographic)
+            {
+                float bottom = cam.transform.position.y - cam.orthographicSize;
+                return bottom - Mathf.Abs(despawnBelowMargin);
+            }
+            return (config ? config.groundY : -5f) - Mathf.Abs(despawnBelowMargin);
+        }
+
+        private IEnumerator CoAutoDespawn(GameObject go, float cutoffY, float maxLifetime)
+        {
+            float t = 0f;
+            maxLifetime = Mathf.Max(1f, maxLifetime);
+
+            // Use unscaled time so it still cleans up if menu timeScale changes
+            while (go != null && t < maxLifetime)
+            {
+                t += Time.unscaledDeltaTime;
+                if (go == null) yield break;
+
+                if (go.transform.position.y <= cutoffY)
+                {
+                    Destroy(go);
+                    yield break;
+                }
+                yield return null;
+            }
+
+            if (go != null) Destroy(go);
+        }
+
+        private void ClearDecorativeOnly()
         {
             if (Fruit.Active.Count == 0) return;
             var list = new System.Collections.Generic.List<Fruit>(Fruit.Active);
             for (int i = 0; i < list.Count; i++)
             {
-                var f = list[i];
+                Fruit f = list[i];
                 if (!f) continue;
                 if (f.decorative) Destroy(f.gameObject);
             }

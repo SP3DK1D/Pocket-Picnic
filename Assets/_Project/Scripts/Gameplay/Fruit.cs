@@ -105,6 +105,25 @@ namespace CatchTheFruit
             bool isBomb = (data != null && data.isBomb);
             int score = (data != null) ? data.scoreValue : 0;
 
+            // ===== Shield consume (added) =====
+            if (isBomb && PowerupManager.ConsumeShieldIfActive())
+            {
+                // Optional: play a "shield block" VFX/SFX if you have one
+                // VFXManager.Instance?.PlayShieldBlock(transform.position);
+
+                // Report as a safe catch so listeners (lives system) DO NOT penalize
+                GameEvents.RaiseFruitCaught(data?.id ?? "?", score, false);
+
+                // If this fruit also carried a powerup (rare for bombs), still grant it
+                if (data != null && data.powerup != null)
+                    GameEvents.RaisePowerupPicked(data.powerup);
+
+                // Do NOT play bomb explosion VFX on a shielded hit
+                Destroy(gameObject);
+                return;
+            }
+
+            // Normal path (unchanged)
             GameEvents.RaiseFruitCaught(data?.id ?? "?", score, isBomb);
 
             if (data != null && data.powerup != null)

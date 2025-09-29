@@ -119,7 +119,17 @@ namespace CatchTheFruit
             var fd = spawnTable.Pick();
             if (!fd) return;
 
-            float x = URandom.Range(-config.arenaHalfWidth, config.arenaHalfWidth);
+            // Calculate safe spawn range based on camera width
+            var cam = Camera.main;
+            float halfWidth = config.arenaHalfWidth;
+            if (cam)
+            {
+                // dynamic half-width from camera (orthographic only)
+                halfWidth = cam.orthographicSize * cam.aspect - 0.2f; // margin so fruits aren’t cut off
+                halfWidth = Mathf.Max(0.1f, halfWidth);
+            }
+
+            float x = URandom.Range(-halfWidth, halfWidth);
             float y = config.spawnY;
 
             var f = Instantiate(fruitPrefab, new Vector3(x, y, 0f), Quaternion.identity);
@@ -128,7 +138,8 @@ namespace CatchTheFruit
             float speedMul = spawnTable.fallSpeedMultiplier * _speedOverride * globalFallSpeed;
             f.Init(fd, speedMul, config.groundY);
 
-            if (verboseLogs) Debug.Log($"[Spawner] + {fd.id} at x={x:0.00}, speedMul={speedMul:0.##}, alive={Fruit.Active.Count}");
+            if (verboseLogs)
+                Debug.Log($"[Spawner] + {fd.id} at x={x:0.00}, speedMul={speedMul:0.##}, alive={Fruit.Active.Count}");
         }
 
         // ---------- Clear ----------

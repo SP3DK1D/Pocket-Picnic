@@ -12,6 +12,9 @@ namespace CatchTheFruit
     /// </summary>
     public class PowerupManager : MonoBehaviour
     {
+        // ===== Singleton (added) =====
+        public static PowerupManager Instance { get; private set; }
+
         // ===== Freeze visibility for debugging / guards =====
         public static bool FreezeActive { get; private set; }
 
@@ -20,6 +23,10 @@ namespace CatchTheFruit
         public static float MagnetRadius { get; private set; }
         public static float MagnetPullSpeed { get; private set; }
         public static Transform PlayerTransform { get; private set; }
+
+        // ===== Shield (static accessors added) =====
+        public static bool ShieldIsActive => Instance != null && Instance._shieldActive;
+        public static bool ConsumeShieldIfActive() => Instance != null && Instance.TryConsumeShieldHit();
 
         [Header("Player (used by Magnet)")]
         [SerializeField] private Transform player; // auto-find by Tag=Player if null
@@ -50,6 +57,9 @@ namespace CatchTheFruit
 
         void Awake()
         {
+            // Singleton init (added)
+            Instance = this;
+
             if (!player)
             {
                 var pGo = GameObject.FindGameObjectWithTag("Player");
@@ -71,6 +81,9 @@ namespace CatchTheFruit
             GameEvents.OnGameStart -= OnStart;
             GameEvents.OnGameOver -= OnOver;
             EndAllEffectsImmediate();         // also restores timeScale = 1
+
+            // Optional: clear singleton when disabled (keeps scene changes safe)
+            if (Instance == this) Instance = null;
         }
 
         void Update()
@@ -235,6 +248,7 @@ namespace CatchTheFruit
             _shieldCo = null;
         }
 
+        // Instance-scoped consume; use static wrapper for external callers
         public bool TryConsumeShieldHit()
         {
             if (!_shieldActive) return false;
