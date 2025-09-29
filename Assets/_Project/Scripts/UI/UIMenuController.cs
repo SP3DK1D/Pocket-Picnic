@@ -4,7 +4,7 @@ namespace CatchTheFruit
 {
     public class UIMenuController : MonoBehaviour
     {
-        public enum UiState { MainMenu, Difficulty, Hud, Pause, GameOver }
+        public enum UiState { MainMenu, Difficulty, Hud, Pause, GameOver, Options }
 
         [Header("Panels (assign all)")]
         [SerializeField] private GameObject mainMenuPanel;
@@ -12,6 +12,7 @@ namespace CatchTheFruit
         [SerializeField] private GameObject hudPanel;
         [SerializeField] private GameObject pausePanel;
         [SerializeField] private GameObject gameOverPanel;
+        [SerializeField] private GameObject optionsPanel;   // Options panel (must be assigned or discoverable)
 
         [Header("Player root")]
         [SerializeField] private GameObject player;
@@ -22,23 +23,30 @@ namespace CatchTheFruit
 
         private UiState _state = UiState.MainMenu;
 
-        // Remember the player's original Y/Z so we only re-center X
         float _playerStartY;
         float _playerStartZ;
 
-        // NEW: track when Reset button is being held, so we can gate input
+        // kept for compatibility; not relied on for close anymore
+        bool _optionsFromPause;
         bool _resetHolding;
+
+        void OnValidate()
+        {
+            if (!optionsPanel)
+                Debug.LogWarning("[UIMenuController] optionsPanel is not assigned. Will try to auto-find an OptionManager at runtime.", this);
+        }
 
         void Awake()
         {
             RunState.SetGameplay(false);
+
             CachePlayerStart();
 
             ApplyState(UiState.MainMenu, ensureTimeScale: true);
             SafeSetActive(player, false);
 
             if (menuRain) menuRain.gameObject.SetActive(true);
-            if (gameplaySpawner) gameplaySpawner.StopAndClear();   // ensure no gameplay fruits remain
+            if (gameplaySpawner) gameplaySpawner.StopAndClear();
         }
 
         void OnEnable()
@@ -59,8 +67,7 @@ namespace CatchTheFruit
             if (menuRain) menuRain.gameObject.SetActive(false);
 
             SafeSetActive(player, true);
-
-            CenterPlayerHorizontally(); // always start in the center
+            CenterPlayerHorizontally();
 
             ApplyState(UiState.Hud);
         }
@@ -72,64 +79,66 @@ namespace CatchTheFruit
             SafeSetActive(player, false);
             ApplyState(gameOverPanel ? UiState.GameOver : UiState.MainMenu);
 
-            // If you also want to pre-center for next run, uncomment:
-            // CenterPlayerHorizontally();
-
-            // If you added the UIHud ForceRefresh earlier, keep this:
-            var hud = UIHud.Instance ? UIHud.Instance : FindObjectOfType<UIHud>(true);
+            var hud = UIHud.Instance ? UIHud.Instance : FindController<UIHud>(true);
             hud?.ForceRefreshGameOverUI();
         }
 
+        // ===== Main Menu buttons =====
         public void OnStartPressed() => ApplyState(UiState.Difficulty);
 
         public void OnPickEasy() { DifficultyManager.PickEasy(); GameEvents.RaiseGameStart(); }
         public void OnPickMedium() { DifficultyManager.PickMedium(); GameEvents.RaiseGameStart(); }
         public void OnPickHard() { DifficultyManager.PickHard(); GameEvents.RaiseGameStart(); }
 
-        public void OnPause()
+        public void OnOptionsFromMain()
         {
-            PauseManager.Instance?.Pause();
-            ApplyState(UiState.Pause);
-        }
-        public void OnResume()
-        {
-            PauseManager.Instance?.Resume();
-            ApplyState(UiState.Hud);
+            _optionsFromPause = false;
+            PauseManager.Instance?.ResumeForce();
+            ApplyState(UiState.Options);
         }
 
-        // ========= Reset/Restart =========
+        // ===== Pause flow =====
+        public void OnPause() { PauseManager.Instance?.Pause(); ApplyState(UiState.Pause); }
+        public void OnResume() { PauseManager.Instance?.Resume(); ApplyState(UiState.Hud); }
 
-        /// <summary>
-        /// Hook this to the Reset button's OnPointerDown.
-        /// Gates gameplay input while the button is held so the player can't drift left.
-        /// </summary>
+        public void OnOptionsFromPause()
+        {
+            _optionsFromPause = true;
+            // remain paused while viewing options
+            ApplyState(UiState.Options);
+        }
+
+        public void OnOptionsClose()
+        {
+            // NEW: source-agnostic return — if the game is paused, go back to Pause; else Main Menu.
+            if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
+            {
+                ApplyState(UiState.Pause);
+                PauseManager.Instance.Pause(); // ensure paused (no side effects if already paused)
+            }
+            else
+            {
+                ApplyState(UiState.MainMenu, ensureTimeScale: true);
+            }
+        }
+
         public void OnRestartHoldStart()
         {
             _resetHolding = true;
-            RunState.SetGameplay(false);  // stop gameplay input while holding
-
-            // Stop any lingering velocity so physics can't push the player left
+            RunState.SetGameplay(false);
             ZeroPlayerVelocity();
         }
 
-        /// <summary>
-        /// Hook this to the Reset button's OnClick (Pointer Up).
-        /// Performs the existing restart flow.
-        /// </summary>
         public void OnRestart()
         {
             _resetHolding = false;
 
             PauseManager.Instance?.ResumeForce();
-
-            // End the current run cleanly
             GameEvents.RaiseGameOver();
 
-            // Clear gameplay fruits & hide menu rain during restart
             if (gameplaySpawner) gameplaySpawner.StopAndClear();
             if (menuRain) menuRain.gameObject.SetActive(false);
 
-            // Start a new run (HandleGameStart will center the player)
             GameEvents.RaiseGameStart();
 
             SafeSetActive(player, true);
@@ -149,15 +158,21 @@ namespace CatchTheFruit
             ApplyState(UiState.MainMenu, ensureTimeScale: true);
         }
 
-        // ========= State helpers =========
-
+        // ===== Panel state handling =====
         void ApplyState(UiState target, bool ensureTimeScale = false)
         {
+            if (target == UiState.Options && !ResolveOptionsPanelIfNeeded())
+            {
+                Debug.LogError("[UIMenuController] Options panel is not assigned and could not be auto-found. Aborting state change to Options.", this);
+                return;
+            }
+
             SafeSetActive(mainMenuPanel, false);
             SafeSetActive(difficultyPanel, false);
             SafeSetActive(hudPanel, false);
             SafeSetActive(pausePanel, false);
             SafeSetActive(gameOverPanel, false);
+            SafeSetActive(optionsPanel, false);
 
             if (ensureTimeScale) PauseManager.Instance?.ResumeForce();
 
@@ -168,17 +183,40 @@ namespace CatchTheFruit
                 case UiState.Hud: SafeSetActive(hudPanel, true); break;
                 case UiState.Pause: SafeSetActive(pausePanel, true); break;
                 case UiState.GameOver: SafeSetActive(gameOverPanel, true); break;
+                case UiState.Options: SafeSetActive(optionsPanel, true); break;
             }
 
             _state = target;
+        }
+
+        bool ResolveOptionsPanelIfNeeded()
+        {
+            if (optionsPanel) return true;
+
+            var mgr = FindController<OptionManager>(true);
+            if (mgr)
+            {
+                optionsPanel = mgr.gameObject;
+                return true;
+            }
+            return false;
+        }
+
+        static T FindController<T>(bool includeInactive = false) where T : MonoBehaviour
+        {
+#if UNITY_2023_1_OR_NEWER
+            return Object.FindFirstObjectByType<T>(includeInactive ? FindObjectsInactive.Include : FindObjectsInactive.Exclude);
+#else
+#pragma warning disable 618
+            return Object.FindObjectOfType<T>(includeInactive);
+#pragma warning restore 618
+#endif
         }
 
         void SafeSetActive(GameObject go, bool on)
         {
             if (go && go.activeSelf != on) go.SetActive(on);
         }
-
-        // ========= NEW helpers =========
 
         void CachePlayerStart()
         {
@@ -191,14 +229,13 @@ namespace CatchTheFruit
         void CenterPlayerHorizontally()
         {
             if (!player) return;
-
             float centerX = 0f;
             var cam = Camera.main;
             if (cam) centerX = cam.transform.position.x;
 
             var pos = player.transform.position;
             pos.x = centerX;
-            pos.y = _playerStartY;   // keep original height
+            pos.y = _playerStartY;
             pos.z = _playerStartZ;
             player.transform.position = pos;
 
@@ -210,18 +247,10 @@ namespace CatchTheFruit
             if (!player) return;
 
             var rb2d = player.GetComponent<Rigidbody2D>();
-            if (rb2d)
-            {
-                rb2d.linearVelocity = Vector2.zero;
-                rb2d.angularVelocity = 0f;
-            }
+            if (rb2d) { rb2d.linearVelocity = Vector2.zero; rb2d.angularVelocity = 0f; }
 
             var rb3d = player.GetComponent<Rigidbody>();
-            if (rb3d)
-            {
-                rb3d.linearVelocity = Vector3.zero;
-                rb3d.angularVelocity = Vector3.zero;
-            }
+            if (rb3d) { rb3d.linearVelocity = Vector3.zero; rb3d.angularVelocity = Vector3.zero; }
         }
     }
 }
