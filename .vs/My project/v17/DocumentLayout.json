@@ -3,16 +3,32 @@
   "WorkspaceRootPath": "D:\\yt vids\\My project\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|d:\\yt vids\\my project\\assets\\_project\\scripts\\managers\\optionmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\managers\\optionmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|d:\\yt vids\\my project\\assets\\_project\\scripts\\utility\\safeareafitter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\utility\\safeareafitter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|d:\\yt vids\\my project\\assets\\_project\\scripts\\ui\\menuflowcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|d:\\yt vids\\my project\\assets\\_project\\scripts\\utility\\safeareapanel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\utility\\safeareapanel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\utility\\uisafecorneranchor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\utility\\uisafecorneranchor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\ui\\powerupoverlay.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\ui\\powerupoverlay.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\ui\\menuflowcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\ui\\menuflowcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\ui\\uimenucontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\ui\\uimenucontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\managers\\optionmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\managers\\optionmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -27,38 +43,86 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "OptionManager.cs",
-              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\OptionManager.cs",
-              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Managers\\OptionManager.cs",
-              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\OptionManager.cs",
-              "RelativeToolTip": "Assets\\_Project\\Scripts\\Managers\\OptionManager.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAAAAAAAAAAAA==",
+              "Title": "SafeAreaFitter.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\SafeAreaFitter.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Utility\\SafeAreaFitter.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\SafeAreaFitter.cs",
+              "RelativeToolTip": "Assets\\_Project\\Scripts\\Utility\\SafeAreaFitter.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAxwA0AAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-29T20:32:45.268Z",
+              "WhenOpened": "2025-09-29T22:33:19.206Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "SafeAreaPanel.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\SafeAreaPanel.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Utility\\SafeAreaPanel.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\SafeAreaPanel.cs",
+              "RelativeToolTip": "Assets\\_Project\\Scripts\\Utility\\SafeAreaPanel.cs",
+              "ViewState": "AgIAADwAAAAAAAAAAAAQwEkAAAAmAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-29T22:28:21.953Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "PowerupOverlay.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\PowerupOverlay.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\UI\\PowerupOverlay.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\PowerupOverlay.cs",
+              "RelativeToolTip": "Assets\\_Project\\Scripts\\UI\\PowerupOverlay.cs",
+              "ViewState": "AgIAAEYAAAAAAAAAAAAQwE4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-29T22:10:19.554Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "UISafeCornerAnchor.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\UISafeCornerAnchor.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Utility\\UISafeCornerAnchor.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\UISafeCornerAnchor.cs",
+              "RelativeToolTip": "Assets\\_Project\\Scripts\\Utility\\UISafeCornerAnchor.cs",
+              "ViewState": "AgIAAE0AAAAAAAAAAAAQwFwAAAAXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-29T20:34:10.752Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "OptionManager.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\OptionManager.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Managers\\OptionManager.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\OptionManager.cs",
+              "RelativeToolTip": "Assets\\_Project\\Scripts\\Managers\\OptionManager.cs",
+              "ViewState": "AgIAAHMAAAAAAAAAAAAxwHsAAAA2AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-29T20:32:45.268Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
               "Title": "MenuFlowController.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\MenuFlowController.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\UI\\MenuFlowController.cs",
               "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\MenuFlowController.cs",
               "RelativeToolTip": "Assets\\_Project\\Scripts\\UI\\MenuFlowController.cs",
-              "ViewState": "AgIAAGIAAAAAAAAAAAAQwHAAAAA3AAAAAAAAAA==",
+              "ViewState": "AgIAAH8AAAAAAAAAAAAQwI4AAAAuAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-29T18:10:05.339Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-29T18:10:05.339Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 5,
               "Title": "UIMenuController.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\UIMenuController.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\UI\\UIMenuController.cs",
               "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\UIMenuController.cs",
               "RelativeToolTip": "Assets\\_Project\\Scripts\\UI\\UIMenuController.cs",
-              "ViewState": "AgIAANkAAAAAAAAAAAAQwOkAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAOYAAAAAAAAAAAAQwOsAAAAlAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-29T20:31:45.1Z"
             }
