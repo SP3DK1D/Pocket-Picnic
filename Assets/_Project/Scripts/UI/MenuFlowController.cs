@@ -18,14 +18,7 @@ namespace CatchTheFruit
         [SerializeField] private GameObject player;
         [SerializeField] private bool autoShowMainOnAwake = true;
 
-        // kept for compatibility
         bool _optionsFromPause;
-
-        void OnValidate()
-        {
-            if (!optionsPanel)
-                Debug.LogWarning("[MenuFlowController] optionsPanel is not assigned. Will try to auto-find an OptionManager at runtime.", this);
-        }
 
         void Awake()
         {
@@ -48,27 +41,34 @@ namespace CatchTheFruit
             ShowOnly(hudPanel);
             SafeSetActive(player, true);
             GameEvents.RaiseGameStart();
+
+            // hearts fresh at start
+            HeartLivesUI.ResetAllToFull();
         }
 
         // ===== Pause flow =====
         public void OnPause()
         {
             PauseManager.Instance?.Pause();
-            ShowOnly(pausePanel);                  // <— ensure ONLY pause is visible
+            ShowOnly(pausePanel);
         }
 
         public void OnResume()
         {
             PauseManager.Instance?.Resume();
-            ShowOnly(hudPanel);                    // <— bring HUD back reliably
+            ShowOnly(hudPanel);
         }
 
         public void OnRestart()
         {
             PauseManager.Instance?.ResumeForce();
-            ShowOnly(hudPanel);                    // <— show HUD immediately
+            ShowOnly(hudPanel);
             GameEvents.RaiseGameOver();
             GameEvents.RaiseGameStart();
+
+            // hard visual reset for hearts on explicit reset
+            HeartLivesUI.ResetAllToFull();
+
             SafeSetActive(player, true);
         }
 
@@ -86,32 +86,23 @@ namespace CatchTheFruit
         {
             _optionsFromPause = false;
             PauseManager.Instance?.ResumeForce();
-            if (!ResolveOptionsPanelIfNeeded())
-            {
-                Debug.LogError("[MenuFlowController] Options panel not assigned and not found. Aborting.", this);
-                return;
-            }
+            if (!optionsPanel) { Debug.LogError("[MenuFlowController] Options panel not assigned."); return; }
             ShowOnly(optionsPanel);
         }
 
         public void OnOptionsFromPause()
         {
             _optionsFromPause = true;
-            if (!ResolveOptionsPanelIfNeeded())
-            {
-                Debug.LogError("[MenuFlowController] Options panel not assigned and not found. Aborting.", this);
-                return;
-            }
+            if (!optionsPanel) { Debug.LogError("[MenuFlowController] Options panel not assigned."); return; }
             ShowOnly(optionsPanel);
         }
 
         public void OnOptionsClose()
         {
-            // If paused, go back to Pause; else back to Main.
             if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
             {
                 ShowOnly(pausePanel);
-                PauseManager.Instance.Pause(); // ensure timeScale == 0
+                PauseManager.Instance.Pause();
             }
             else
             {
@@ -120,20 +111,6 @@ namespace CatchTheFruit
         }
 
         // ===== Helpers =====
-        bool ResolveOptionsPanelIfNeeded()
-        {
-            if (optionsPanel) return true;
-#if UNITY_2023_1_OR_NEWER
-            var mgr = Object.FindFirstObjectByType<OptionManager>(FindObjectsInactive.Include);
-#else
-#pragma warning disable 618
-            var mgr = Object.FindObjectOfType<OptionManager>(true);
-#pragma warning restore 618
-#endif
-            if (mgr) { optionsPanel = mgr.gameObject; return true; }
-            return false;
-        }
-
         void ShowOnly(GameObject toShow)
         {
             if (!toShow) { Debug.LogError("[MenuFlowController] ShowOnly() got null.", this); return; }

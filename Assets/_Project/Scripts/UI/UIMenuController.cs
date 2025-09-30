@@ -12,7 +12,7 @@ namespace CatchTheFruit
         [SerializeField] private GameObject hudPanel;
         [SerializeField] private GameObject pausePanel;
         [SerializeField] private GameObject gameOverPanel;
-        [SerializeField] private GameObject optionsPanel;   // Options panel (must be assigned or discoverable)
+        [SerializeField] private GameObject optionsPanel;
 
         [Header("Player root")]
         [SerializeField] private GameObject player;
@@ -26,20 +26,12 @@ namespace CatchTheFruit
         float _playerStartY;
         float _playerStartZ;
 
-        // kept for compatibility; not relied on for close anymore
         bool _optionsFromPause;
         bool _resetHolding;
-
-        void OnValidate()
-        {
-            if (!optionsPanel)
-                Debug.LogWarning("[UIMenuController] optionsPanel is not assigned. Will try to auto-find an OptionManager at runtime.", this);
-        }
 
         void Awake()
         {
             RunState.SetGameplay(false);
-
             CachePlayerStart();
 
             ApplyState(UiState.MainMenu, ensureTimeScale: true);
@@ -70,6 +62,9 @@ namespace CatchTheFruit
             CenterPlayerHorizontally();
 
             ApplyState(UiState.Hud);
+
+            // --- ensure hearts look fresh at the start of any run
+            HeartLivesUI.ResetAllToFull();
         }
 
         void HandleGameOver()
@@ -83,38 +78,24 @@ namespace CatchTheFruit
             hud?.ForceRefreshGameOverUI();
         }
 
-        // ===== Main Menu buttons =====
         public void OnStartPressed() => ApplyState(UiState.Difficulty);
 
         public void OnPickEasy() { DifficultyManager.PickEasy(); GameEvents.RaiseGameStart(); }
         public void OnPickMedium() { DifficultyManager.PickMedium(); GameEvents.RaiseGameStart(); }
         public void OnPickHard() { DifficultyManager.PickHard(); GameEvents.RaiseGameStart(); }
 
-        public void OnOptionsFromMain()
-        {
-            _optionsFromPause = false;
-            PauseManager.Instance?.ResumeForce();
-            ApplyState(UiState.Options);
-        }
-
-        // ===== Pause flow =====
         public void OnPause() { PauseManager.Instance?.Pause(); ApplyState(UiState.Pause); }
         public void OnResume() { PauseManager.Instance?.Resume(); ApplyState(UiState.Hud); }
 
-        public void OnOptionsFromPause()
-        {
-            _optionsFromPause = true;
-            // remain paused while viewing options
-            ApplyState(UiState.Options);
-        }
+        public void OnOptionsFromMain() { _optionsFromPause = false; PauseManager.Instance?.ResumeForce(); ApplyState(UiState.Options); }
+        public void OnOptionsFromPause() { _optionsFromPause = true; ApplyState(UiState.Options); }
 
         public void OnOptionsClose()
         {
-            // NEW: source-agnostic return — if the game is paused, go back to Pause; else Main Menu.
             if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
             {
                 ApplyState(UiState.Pause);
-                PauseManager.Instance.Pause(); // ensure paused (no side effects if already paused)
+                PauseManager.Instance.Pause();
             }
             else
             {
@@ -141,6 +122,9 @@ namespace CatchTheFruit
 
             GameEvents.RaiseGameStart();
 
+            // --- hard visual reset for hearts on explicit reset
+            HeartLivesUI.ResetAllToFull();
+
             SafeSetActive(player, true);
             ApplyState(UiState.Hud);
         }
@@ -158,15 +142,8 @@ namespace CatchTheFruit
             ApplyState(UiState.MainMenu, ensureTimeScale: true);
         }
 
-        // ===== Panel state handling =====
         void ApplyState(UiState target, bool ensureTimeScale = false)
         {
-            if (target == UiState.Options && !ResolveOptionsPanelIfNeeded())
-            {
-                Debug.LogError("[UIMenuController] Options panel is not assigned and could not be auto-found. Aborting state change to Options.", this);
-                return;
-            }
-
             SafeSetActive(mainMenuPanel, false);
             SafeSetActive(difficultyPanel, false);
             SafeSetActive(hudPanel, false);
@@ -187,19 +164,6 @@ namespace CatchTheFruit
             }
 
             _state = target;
-        }
-
-        bool ResolveOptionsPanelIfNeeded()
-        {
-            if (optionsPanel) return true;
-
-            var mgr = FindController<OptionManager>(true);
-            if (mgr)
-            {
-                optionsPanel = mgr.gameObject;
-                return true;
-            }
-            return false;
         }
 
         static T FindController<T>(bool includeInactive = false) where T : MonoBehaviour
