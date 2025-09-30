@@ -19,7 +19,16 @@ namespace CatchTheFruit
 
         // tumble
         float _tumbleSpeed;  // deg/sec
-        int _tumbleDir;    // +1 or -1
+        int _tumbleDir;      // +1 or -1
+
+        // Cached helpers
+        SpriteRenderer _sr;
+
+        // Convenience props (used by BasketCatchZone)
+        public bool IsBomb => data != null && data.isBomb;
+        public bool IsPowerupCarrier => data != null && data.powerup != null;
+        public bool IsCatchable => !decorative && (!IsBomb);
+        public Vector2 Position2D => transform.position;
 
         void OnEnable() { Active.Add(this); }
         void OnDisable() { Active.Remove(this); }
@@ -33,11 +42,12 @@ namespace CatchTheFruit
             _groundY = groundY;
             this.decorative = decorative;
 
-            var sr = GetComponent<SpriteRenderer>();
-            if (fd != null)
+            if (!_sr) _sr = GetComponent<SpriteRenderer>();
+
+            if (fd != null && _sr)
             {
-                sr.sprite = fd.sprite;
-                sr.color = fd.tint;
+                _sr.sprite = fd.sprite;
+                _sr.color = fd.tint;
             }
 
             // Fall speed with a solid floor
@@ -52,9 +62,9 @@ namespace CatchTheFruit
 
             // Normalize to width ≈ 0.8 world units
             const float targetW = 0.8f;
-            if (sr.sprite)
+            if (_sr && _sr.sprite)
             {
-                float w = sr.sprite.bounds.size.x;
+                float w = _sr.sprite.bounds.size.x;
                 if (w > 0.0001f) transform.localScale = Vector3.one * (targetW / w);
             }
 
@@ -92,52 +102,49 @@ namespace CatchTheFruit
                 bool isPowerup = (data != null && data.powerup != null);
                 bool isBomb = (data != null && data.isBomb);
                 GameEvents.RaiseFruitMissed(data?.id ?? "?", isBomb, isPowerup);
-                Destroy(gameObject);
+                Retire();
             }
         }
 
-        void OnTriggerEnter2D(Collider2D other)
+        // ----- Catch entry points (called by BasketCatchZone) -----
+        public void RaiseCaughtFruit()
         {
-            if (!other.CompareTag("Player")) return;
-
-            if (decorative) { Destroy(gameObject); return; }
-
-            bool isBomb = (data != null && data.isBomb);
             int score = (data != null) ? data.scoreValue : 0;
+            GameEvents.RaiseFruitCaught(data?.id ?? "?", score, false);
+            if (IsPowerupCarrier) GameEvents.RaisePowerupPicked(data.powerup);
+            Retire();
+        }
 
-            // ===== Shield consume (added) =====
-            if (isBomb && PowerupManager.ConsumeShieldIfActive())
-            {
-                // Optional: play a "shield block" VFX/SFX if you have one
-                // VFXManager.Instance?.PlayShieldBlock(transform.position);
+        public void RaiseCaughtSafe()
+        {
+            int score = (data != null) ? data.scoreValue : 0;
+            GameEvents.RaiseFruitCaught(data?.id ?? "?", score, false);
+            if (IsPowerupCarrier) GameEvents.RaisePowerupPicked(data.powerup);
+            Retire();
+        }
 
-                // Report as a safe catch so listeners (lives system) DO NOT penalize
-                GameEvents.RaiseFruitCaught(data?.id ?? "?", score, false);
+        public void RaiseCaughtBomb()
+        {
+            int score = (data != null) ? data.scoreValue : 0;
+            GameEvents.RaiseFruitCaught(data?.id ?? "?", score, true);
+            if (IsPowerupCarrier) GameEvents.RaisePowerupPicked(data.powerup);
+            VFXManager.Instance?.PlayBombExplosion(transform.position);
+            Retire();
+        }
 
-                // If this fruit also carried a powerup (rare for bombs), still grant it
-                if (data != null && data.powerup != null)
-                    GameEvents.RaisePowerupPicked(data.powerup);
-
-                // Do NOT play bomb explosion VFX on a shielded hit
-                Destroy(gameObject);
-                return;
-            }
-
-            // Normal path (unchanged)
-            GameEvents.RaiseFruitCaught(data?.id ?? "?", score, isBomb);
-
-            if (data != null && data.powerup != null)
-                GameEvents.RaisePowerupPicked(data.powerup);
-
-            if (isBomb)
-                VFXManager.Instance?.PlayBombExplosion(transform.position);
-
-            Destroy(gameObject);
+        public void Nudge(Vector2 delta)
+        {
+            if (decorative) return;
+            transform.position += (Vector3)delta;
         }
 
         public void Retire()
         {
-            if (this) Destroy(gameObject);
+            // Recycle via spawner's pool if present, else destroy
+            if (FruitSpawner.Instance)
+                FruitSpawner.Instance.Recycle(this);
+            else
+                Destroy(gameObject);
         }
     }
 }

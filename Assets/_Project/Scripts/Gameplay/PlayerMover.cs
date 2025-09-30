@@ -6,11 +6,12 @@ using UnityEngine.InputSystem;
 namespace CatchTheFruit
 {
     /// <summary>
-    /// Mobile-friendly basket mover.
+    /// Mobile-friendly basket mover (timeScale-agnostic).
     /// - Reads touch/mouse X, clamps to arena, and moves a Rigidbody2D.
-    /// - Snap: teleports under pointer. Smooth: eased with speed (unscaled).
-    /// - Uses FixedUpdate + MovePosition for reliable trigger hits.
-    /// - No collider requirement (so you can use a child CatchZone).
+    /// - Snap: teleports under pointer. Smooth: eased with speed.
+    /// - Runs entirely in Update using Time.unscaledDeltaTime so movement feel
+    ///   is identical whether Freeze (slow-mo) is active or not.
+    /// - Uses Rigidbody2D.MovePosition for stable trigger interactions.
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Rigidbody2D))]
@@ -24,23 +25,27 @@ namespace CatchTheFruit
         [SerializeField] private FollowMode follow = FollowMode.Snap;
 
         [Tooltip("Used only in Smooth mode: world-units/second toward the pointer.")]
-        [Min(0f)] public float smoothSpeed = 20f;   // good for mobile
+        [Min(0f)] public float smoothSpeed = 20f;   // good default for mobile
 
         [Header("Input")]
         [Tooltip("If true, you must be actively touching/holding to move. If false, will follow last known pointer position.")]
         public bool requirePress = true;
 
-        Rigidbody2D _rb;
-        Camera _cam;
+        private Rigidbody2D _rb;
+        private Camera _cam;
 
-        // Target x computed in Update, applied in FixedUpdate
-        float _targetX;
-        bool _hasTarget;
+        // Target x computed in Update and applied immediately
+        private float _targetX;
+        private bool _hasTarget;
+
+        // Prefer config speed when available
+        float MoveSpeed =>
+            (config != null && config.playerMoveSpeed > 0f) ? config.playerMoveSpeed : Mathf.Max(0f, smoothSpeed);
 
         void Awake()
         {
             _rb = GetComponent<Rigidbody2D>();
-            _rb.isKinematic = true;              // kinematic for MovePosition control
+            _rb.isKinematic = true;                          // kinematic for MovePosition control
             _rb.interpolation = RigidbodyInterpolation2D.Interpolate;
 
             _cam = Camera.main;
@@ -59,7 +64,7 @@ namespace CatchTheFruit
         {
             if (!_cam) return;
 
-            // Read input each frame (unscaled time behavior is handled in movement step)
+            // 1) Read pointer every frame
             if (TryGetPointerScreenX(requirePress, out float screenX))
             {
                 float worldX = ScreenToWorldX(screenX);
@@ -70,40 +75,36 @@ namespace CatchTheFruit
             }
             else if (!requirePress)
             {
-                // No new input but we keep the last target (follow stays active)
-                _hasTarget = true;
+                _hasTarget = true; // keep following last known target
             }
             else
             {
-                // Requiring press and none present -> no movement update
                 _hasTarget = false;
             }
-        }
 
-        void FixedUpdate()
-        {
+            // 2) Apply movement EVERY FRAME using unscaled delta so Freeze doesn't affect feel
             if (!_hasTarget) return;
 
             Vector2 p = _rb.position;
 
             if (follow == FollowMode.Snap)
             {
-                p.x = _targetX;
+                p.x = _targetX; // immediate snap under pointer
             }
             else
             {
-                // Smooth toward target using unscaled time so Freeze/TimeScale don't affect feel
-                float step = (config ? config.playerMoveSpeed : smoothSpeed) * Time.unscaledDeltaTime;
+                float step = MoveSpeed * Time.unscaledDeltaTime;
                 p.x = Mathf.MoveTowards(p.x, _targetX, step);
             }
 
+            // Use MovePosition for smooth interpolation & proper trigger interactions.
             _rb.MovePosition(p);
         }
 
         float ScreenToWorldX(float screenX)
         {
-            // Convert a screen X to world X at z-plane of the player relative to camera
-            float z = -_cam.transform.position.z; // camera is usually at -10
+            // Convert screen X to world X at player's plane relative to camera
+            float z = -_cam.transform.position.z; // camera typically at -10
             Vector3 pt = new Vector3(screenX, 0f, z);
             return _cam.ScreenToWorldPoint(pt).x;
         }
@@ -111,7 +112,7 @@ namespace CatchTheFruit
         bool TryGetPointerScreenX(bool mustBePressed, out float screenX)
         {
 #if ENABLE_INPUT_SYSTEM
-            // Touch has priority
+            // Touch first
             var touch = Touchscreen.current?.primaryTouch;
             if (touch != null)
             {
@@ -126,7 +127,7 @@ namespace CatchTheFruit
                 }
             }
 
-            // Mouse fallback (useful in editor)
+            // Mouse fallback (Editor)
             var mouse = Mouse.current;
             if (mouse != null)
             {

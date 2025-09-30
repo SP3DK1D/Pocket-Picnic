@@ -3,123 +3,205 @@
 namespace CatchTheFruit
 {
     /// <summary>
-    /// Menu flow: Main → Difficulty → Game (HUD). Also Pause, Restart, Back to Menu, Options.
+    /// Central menu flow controller:
+    /// Main → Difficulty → HUD/Game.
+    /// Also handles Pause, GameOver, Restart, Back to Menu, and Options.
     /// </summary>
     public class MenuFlowController : MonoBehaviour
     {
+        public enum UiState { MainMenu, Difficulty, Hud, Pause, GameOver, Options }
+
         [Header("Panels")]
         [SerializeField] private GameObject mainMenuPanel;
         [SerializeField] private GameObject difficultyPanel;
         [SerializeField] private GameObject hudPanel;
         [SerializeField] private GameObject pausePanel;
-        [SerializeField] private GameObject optionsPanel;  // Options panel
+        [SerializeField] private GameObject gameOverPanel;
+        [SerializeField] private GameObject optionsPanel;
 
         [Header("Optional")]
         [SerializeField] private GameObject player;
+        [SerializeField] private FruitSpawner gameplaySpawner;
+        [SerializeField] private MenuFruitRain menuRain;
         [SerializeField] private bool autoShowMainOnAwake = true;
 
-        bool _optionsFromPause;
+        private UiState _state = UiState.MainMenu;
+        private bool _optionsFromPause;
 
         void Awake()
         {
+            RunState.SetGameplay(false);
+
             if (autoShowMainOnAwake)
             {
-                ShowOnly(mainMenuPanel);
+                ApplyState(UiState.MainMenu, ensureTimeScale: true);
                 SafeSetActive(player, false);
+                if (menuRain) menuRain.gameObject.SetActive(true);
+                if (gameplaySpawner) gameplaySpawner.StopAndClear();
             }
         }
 
-        // ===== Main Menu =====
-        public void OnStartPressed() => ShowOnly(difficultyPanel);
-
-        public void OnPickEasy() { DifficultyManager.PickEasy(); BeginGame(); }
-        public void OnPickMedium() { DifficultyManager.PickMedium(); BeginGame(); }
-        public void OnPickHard() { DifficultyManager.PickHard(); BeginGame(); }
-
-        void BeginGame()
+        void OnEnable()
         {
-            ShowOnly(hudPanel);
-            SafeSetActive(player, true);
-            GameEvents.RaiseGameStart();
+            GameEvents.OnGameStart += HandleGameStart;
+            GameEvents.OnGameOver += HandleGameOver;
+        }
+        void OnDisable()
+        {
+            GameEvents.OnGameStart -= HandleGameStart;
+            GameEvents.OnGameOver -= HandleGameOver;
+        }
 
-            // hearts fresh at start
+        // ===== Game lifecycle =====
+
+        void HandleGameStart()
+        {
+            RunState.SetGameplay(true);
+            PauseManager.Instance?.ResumeForce();
+            if (menuRain) menuRain.gameObject.SetActive(false);
+
+            SafeSetActive(player, true);
+            ApplyState(UiState.Hud);
+
             HeartLivesUI.ResetAllToFull();
         }
 
+        void HandleGameOver()
+        {
+            RunState.SetGameplay(false);
+            PauseManager.Instance?.ResumeForce();
+            SafeSetActive(player, false);
+            ApplyState(gameOverPanel ? UiState.GameOver : UiState.MainMenu);
+
+            var hud = UIHud.Instance ? UIHud.Instance : FindController<UIHud>(true);
+            hud?.ForceRefreshGameOverUI();
+        }
+
+        // ===== Main Menu / Difficulty =====
+
+        public void OnStartPressed() => ApplyState(UiState.Difficulty);
+
+        public void OnPickEasy()   { DifficultyManager.PickEasy();   GameEvents.RaiseGameStart(); }
+        public void OnPickMedium() { DifficultyManager.PickMedium(); GameEvents.RaiseGameStart(); }
+        public void OnPickHard()   { DifficultyManager.PickHard();   GameEvents.RaiseGameStart(); }
+
+        // ===== GameOver flow =====
+
+        public void OnPlayAgainFromGameOver()
+        {
+            RunState.SetGameplay(false);
+            PauseManager.Instance?.ResumeForce();
+            SafeSetActive(player, false);
+            DifficultyManager.ClearCurrent();
+
+            if (gameplaySpawner) gameplaySpawner.StopAndClear();
+
+            ApplyState(UiState.Difficulty, ensureTimeScale: true);
+            AudioHub.I?.PlayButton();
+        }
+
+        public void OnBackToMenu()
+        {
+            RunState.SetGameplay(false);
+            PauseManager.Instance?.ResumeForce();
+            SafeSetActive(player, false);
+            DifficultyManager.ClearCurrent();
+
+            if (gameplaySpawner) gameplaySpawner.StopAndClear();
+            if (menuRain) menuRain.gameObject.SetActive(true);
+
+            ApplyState(UiState.MainMenu, ensureTimeScale: true);
+        }
+
         // ===== Pause flow =====
+
         public void OnPause()
         {
             PauseManager.Instance?.Pause();
-            ShowOnly(pausePanel);
+            ApplyState(UiState.Pause);
         }
 
         public void OnResume()
         {
             PauseManager.Instance?.Resume();
-            ShowOnly(hudPanel);
+            ApplyState(UiState.Hud);
         }
 
         public void OnRestart()
         {
             PauseManager.Instance?.ResumeForce();
-            ShowOnly(hudPanel);
             GameEvents.RaiseGameOver();
             GameEvents.RaiseGameStart();
 
-            // hard visual reset for hearts on explicit reset
             HeartLivesUI.ResetAllToFull();
 
             SafeSetActive(player, true);
-        }
-
-        public void OnBackToMenu()
-        {
-            PauseManager.Instance?.ResumeForce();
-            ShowOnly(mainMenuPanel);
-            GameEvents.RaiseGameOver();
-            DifficultyManager.ClearCurrent();
-            SafeSetActive(player, false);
+            ApplyState(UiState.Hud);
         }
 
         // ===== Options =====
+
         public void OnOptionsFromMain()
         {
             _optionsFromPause = false;
             PauseManager.Instance?.ResumeForce();
-            if (!optionsPanel) { Debug.LogError("[MenuFlowController] Options panel not assigned."); return; }
-            ShowOnly(optionsPanel);
+            ApplyState(UiState.Options);
         }
 
         public void OnOptionsFromPause()
         {
             _optionsFromPause = true;
-            if (!optionsPanel) { Debug.LogError("[MenuFlowController] Options panel not assigned."); return; }
-            ShowOnly(optionsPanel);
+            ApplyState(UiState.Options);
         }
 
         public void OnOptionsClose()
         {
             if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
             {
-                ShowOnly(pausePanel);
+                ApplyState(UiState.Pause);
                 PauseManager.Instance.Pause();
             }
             else
             {
-                ShowOnly(mainMenuPanel);
+                ApplyState(UiState.MainMenu, ensureTimeScale: true);
             }
         }
 
         // ===== Helpers =====
-        void ShowOnly(GameObject toShow)
-        {
-            if (!toShow) { Debug.LogError("[MenuFlowController] ShowOnly() got null.", this); return; }
 
-            if (mainMenuPanel) mainMenuPanel.SetActive(toShow == mainMenuPanel);
-            if (difficultyPanel) difficultyPanel.SetActive(toShow == difficultyPanel);
-            if (hudPanel) hudPanel.SetActive(toShow == hudPanel);
-            if (pausePanel) pausePanel.SetActive(toShow == pausePanel);
-            if (optionsPanel) optionsPanel.SetActive(toShow == optionsPanel);
+        void ApplyState(UiState target, bool ensureTimeScale = false)
+        {
+            SafeSetActive(mainMenuPanel, false);
+            SafeSetActive(difficultyPanel, false);
+            SafeSetActive(hudPanel, false);
+            SafeSetActive(pausePanel, false);
+            SafeSetActive(gameOverPanel, false);
+            SafeSetActive(optionsPanel, false);
+
+            if (ensureTimeScale) PauseManager.Instance?.ResumeForce();
+
+            switch (target)
+            {
+                case UiState.MainMenu:   SafeSetActive(mainMenuPanel, true);   break;
+                case UiState.Difficulty: SafeSetActive(difficultyPanel, true); break;
+                case UiState.Hud:        SafeSetActive(hudPanel, true);        break;
+                case UiState.Pause:      SafeSetActive(pausePanel, true);      break;
+                case UiState.GameOver:   SafeSetActive(gameOverPanel, true);   break;
+                case UiState.Options:    SafeSetActive(optionsPanel, true);    break;
+            }
+
+            _state = target;
+        }
+
+        static T FindController<T>(bool includeInactive = false) where T : MonoBehaviour
+        {
+#if UNITY_2023_1_OR_NEWER
+            return Object.FindFirstObjectByType<T>(includeInactive ? FindObjectsInactive.Include : FindObjectsInactive.Exclude);
+#else
+#pragma warning disable 618
+            return Object.FindObjectOfType<T>(includeInactive);
+#pragma warning restore 618
+#endif
         }
 
         void SafeSetActive(GameObject go, bool on)

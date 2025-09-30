@@ -1,38 +1,48 @@
-﻿using UnityEngine;
-// Use Unity's Random explicitly to avoid clashes with System.Random
+﻿using System.Collections.Generic;
+using UnityEngine;
 using URandom = UnityEngine.Random;
 
 namespace CatchTheFruit
 {
     /// <summary>
-    /// Spawns Fruit using a SpawnTable. Supports external overrides (waves),
-    /// clears all fruits on GameStart and GameOver, and uses Unity 6 APIs.
-    /// KISS: one job—spawn fruits at an interval that decays over time.
+    /// Spawns Fruit using a SpawnTable and manages an internal object pool.
+    /// - Singleton Instance provides Spawn/Recycle for Fruits.
+    /// - Clears/recovers fruits on GameStart/GameOver.
+    /// - Uses scaled time for spawn pacing (plays nicely with gravity-based Freeze).
     /// </summary>
     public class FruitSpawner : MonoBehaviour
     {
+        public static FruitSpawner Instance { get; private set; }
+
         [Header("Required")]
         [SerializeField] private GameConfig config;       // arena sizes, spawn/ground Y
         [SerializeField] private SpawnTable spawnTable;   // weighted fruit list + pacing
-        [SerializeField] private Fruit fruitPrefab;       // the Fruit MonoBehaviour prefab
+        [SerializeField] private Fruit fruitPrefab;       // prefab for pooled items
+
+        [Header("Pooling")]
+        [Min(0)] public int prewarmCount = 24;
+        [Tooltip("Optional container for pooled fruit objects (kept disabled).")]
+        [SerializeField] private Transform poolRoot; // optional
 
         [Header("Tuning")]
         [Tooltip("Global multiplier applied to ALL fruits’ fall speeds.")]
-        [Min(0.25f)] public float globalFallSpeed = 1.6f;     // <-- speed booster
+        [Min(0.25f)] public float globalFallSpeed = 1.6f;
         [Tooltip("Prevent board flood: skip spawns if this many fruits are alive.")]
-        [Min(1)] public int maxAlive = 20;                    // <-- spawn limiter
+        [Min(1)] public int maxAlive = 20;
 
         [Header("Debug")]
-        [Tooltip("Verbose logs (spawn starts, clears, warnings).")]
         [SerializeField] private bool verboseLogs = false;
 
-        // Runtime
-        private float _interval;
-        private bool _running;
+        // ---- runtime ----
+        float _interval;
+        bool _running;
 
         // External overrides (WaveDirector can set these)
-        private float _speedOverride = 1f;        // multiplies table.fallSpeedMultiplier
-        private float _intervalMulOverride = 1f;  // multiplies initial/min intervals
+        float _speedOverride = 1f;        // multiplies table.fallSpeedMultiplier
+        float _intervalMulOverride = 1f;  // multiplies initial/min intervals
+
+        // Pool
+        readonly Queue<Fruit> _pool = new();
 
         // ---------- Public API for WaveDirector ----------
         public void SetSpawnTable(SpawnTable table) => spawnTable = table;
@@ -40,38 +50,80 @@ namespace CatchTheFruit
         public void SetIntervalMultiplier(float m) => _intervalMulOverride = Mathf.Clamp(m, 0.5f, 1.2f);
 
         // ---------- Lifecycle ----------
-        private void OnEnable()
+        void Awake()
         {
-            GameEvents.OnGameStart += StartRun;
-            GameEvents.OnGameOver += StopRun;
+            if (Instance && Instance != this) { Destroy(gameObject); return; }
+            Instance = this;
+
+            if (!poolRoot)
+            {
+                var go = new GameObject("~FruitPool");
+                go.transform.SetParent(transform, false);
+                poolRoot = go.transform;
+            }
+
+            Prewarm();
         }
 
-        private void OnDisable()
+        void OnEnable()
+        {
+            GameEvents.OnGameStart += StartRun;
+            GameEvents.OnGameOver  += StopRun;
+        }
+
+        void OnDisable()
         {
             GameEvents.OnGameStart -= StartRun;
-            GameEvents.OnGameOver -= StopRun;
+            GameEvents.OnGameOver  -= StopRun;
             _running = false;
             StopAllCoroutines();
         }
 
-        private void OnValidate()
+        void OnValidate()
         {
-            if (!config) Debug.LogWarning("[Spawner] Missing GameConfig reference.", this);
+            if (!config)     Debug.LogWarning("[Spawner] Missing GameConfig reference.", this);
             if (!spawnTable) Debug.LogWarning("[Spawner] Missing SpawnTable reference.", this);
-            if (!fruitPrefab) Debug.LogWarning("[Spawner] Missing Fruit prefab reference.", this);
+            if (!fruitPrefab)Debug.LogWarning("[Spawner] Missing Fruit prefab reference.", this);
+        }
+
+        // ---------- Pool ----------
+        void Prewarm()
+        {
+            if (!fruitPrefab) { Debug.LogError("[Spawner] Assign Fruit prefab.", this); return; }
+            for (int i = 0; i < prewarmCount; i++)
+            {
+                var f = Instantiate(fruitPrefab, poolRoot);
+                f.gameObject.SetActive(false);
+                _pool.Enqueue(f);
+            }
+        }
+
+        Fruit GetFromPool(Vector3 pos, Quaternion rot)
+        {
+            Fruit f = _pool.Count > 0 ? _pool.Dequeue() : Instantiate(fruitPrefab);
+            var t = f.transform;
+            t.SetParent(null, false);
+            t.SetPositionAndRotation(pos, rot);
+            f.gameObject.SetActive(true);
+            return f;
+        }
+
+        public void Recycle(Fruit f)
+        {
+            if (!f) return;
+            f.gameObject.SetActive(false);
+            f.transform.SetParent(poolRoot, false);
+            _pool.Enqueue(f);
         }
 
         // ---------- Run control ----------
-        private void StartRun()
+        void StartRun()
         {
             if (!config || !spawnTable || !fruitPrefab)
             {
                 Debug.LogWarning("[Spawner] Cannot start: assign Config, SpawnTable, and Fruit prefab.", this);
                 return;
             }
-
-            // Safety: if a previous Freeze left timeScale < 1, reset it
-            Time.timeScale = 1f;
 
             ClearExistingFruits(); // clean slate on new run
             _interval = Mathf.Max(0.05f, spawnTable.initialInterval * _intervalMulOverride);
@@ -83,28 +135,26 @@ namespace CatchTheFruit
             StartCoroutine(SpawnLoop());
         }
 
-        private void StopRun()
+        void StopRun()
         {
             _running = false;
             StopAllCoroutines();
-            ClearExistingFruits(); // also clear on lose/menu
+            ClearExistingFruits();
             if (verboseLogs) Debug.Log("[Spawner] Stopped and cleared.");
         }
 
-        /// <summary>Public method expected by menu/UI scripts. Stops spawning and clears immediately.</summary>
         public void StopAndClear() => StopRun();
 
-        private System.Collections.IEnumerator SpawnLoop()
+        System.Collections.IEnumerator SpawnLoop()
         {
-            // Uses scaled time so Freeze slows spawns (feels cohesive).
+            // Uses scaled time by design so pacing matches the slowed world feel.
             while (_running)
             {
-                // Limit concurrent fruits
                 if (Fruit.Active.Count < maxAlive)
                 {
                     SpawnOne();
                 }
-                // wait between checks (even if we skipped)
+
                 yield return new WaitForSeconds(_interval);
 
                 // Decay toward min (both scaled by _intervalMulOverride)
@@ -114,7 +164,7 @@ namespace CatchTheFruit
         }
 
         // ---------- Spawn ----------
-        private void SpawnOne()
+        void SpawnOne()
         {
             var fd = spawnTable.Pick();
             if (!fd) return;
@@ -124,7 +174,6 @@ namespace CatchTheFruit
             float halfWidth = config.arenaHalfWidth;
             if (cam)
             {
-                // dynamic half-width from camera (orthographic only)
                 halfWidth = cam.orthographicSize * cam.aspect - 0.2f; // margin so fruits aren’t cut off
                 halfWidth = Mathf.Max(0.1f, halfWidth);
             }
@@ -132,9 +181,9 @@ namespace CatchTheFruit
             float x = URandom.Range(-halfWidth, halfWidth);
             float y = config.spawnY;
 
-            var f = Instantiate(fruitPrefab, new Vector3(x, y, 0f), Quaternion.identity);
+            var f = GetFromPool(new Vector3(x, y, 0f), Quaternion.identity);
 
-            // Final speed multiplier now includes globalFallSpeed
+            // Final speed multiplier includes globalFallSpeed
             float speedMul = spawnTable.fallSpeedMultiplier * _speedOverride * globalFallSpeed;
             f.Init(fd, speedMul, config.groundY);
 
@@ -143,19 +192,27 @@ namespace CatchTheFruit
         }
 
         // ---------- Clear ----------
-        private void ClearExistingFruits()
+        void ClearExistingFruits()
         {
             if (Fruit.Active.Count > 0)
             {
-                var list = new System.Collections.Generic.List<Fruit>(Fruit.Active);
+                var list = new List<Fruit>(Fruit.Active);
                 for (int i = 0; i < list.Count; i++)
-                    if (list[i]) Destroy(list[i].gameObject);
+                {
+                    var fruit = list[i];
+                    if (!fruit) continue;
+                    Recycle(fruit);
+                }
                 return;
             }
 
             var fruits = FindObjectsByType<Fruit>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
             for (int i = 0; i < fruits.Length; i++)
-                if (fruits[i]) Destroy(fruits[i].gameObject);
+            {
+                var fruit = fruits[i];
+                if (!fruit) continue;
+                Recycle(fruit);
+            }
         }
     }
 }
