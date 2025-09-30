@@ -1,14 +1,17 @@
-﻿using UnityEngine;
+﻿// Assets/_Project/Scripts/UI/MenuFlowController.cs
+using UnityEngine;
 
 namespace CatchTheFruit
 {
     /// <summary>
     /// Central menu flow controller:
-    /// Main → Difficulty → HUD/Game.
-    /// Also handles Pause, GameOver, Restart, Back to Menu, and Options.
+    /// Main → Difficulty → HUD/Game. Also Pause, GameOver, Restart, Options.
+    /// Singleton guard prevents duplicate handlers from fighting each other.
     /// </summary>
     public class MenuFlowController : MonoBehaviour
     {
+        public static MenuFlowController Instance { get; private set; }
+
         public enum UiState { MainMenu, Difficulty, Hud, Pause, GameOver, Options }
 
         [Header("Panels")]
@@ -26,10 +29,12 @@ namespace CatchTheFruit
         [SerializeField] private bool autoShowMainOnAwake = true;
 
         private UiState _state = UiState.MainMenu;
-        private bool _optionsFromPause;
 
         void Awake()
         {
+            if (Instance && Instance != this) { Destroy(gameObject); return; }
+            Instance = this;
+
             RunState.SetGameplay(false);
 
             if (autoShowMainOnAwake)
@@ -44,12 +49,12 @@ namespace CatchTheFruit
         void OnEnable()
         {
             GameEvents.OnGameStart += HandleGameStart;
-            GameEvents.OnGameOver += HandleGameOver;
+            GameEvents.OnGameOver  += HandleGameOver;
         }
         void OnDisable()
         {
             GameEvents.OnGameStart -= HandleGameStart;
-            GameEvents.OnGameOver -= HandleGameOver;
+            GameEvents.OnGameOver  -= HandleGameOver;
         }
 
         // ===== Game lifecycle =====
@@ -71,7 +76,14 @@ namespace CatchTheFruit
             RunState.SetGameplay(false);
             PauseManager.Instance?.ResumeForce();
             SafeSetActive(player, false);
-            ApplyState(gameOverPanel ? UiState.GameOver : UiState.MainMenu);
+
+            if (gameOverPanel)
+                ApplyState(UiState.GameOver);
+            else
+            {
+                Debug.LogWarning("[MenuFlow] GameOver panel not assigned; falling back to MainMenu.");
+                ApplyState(UiState.MainMenu);
+            }
 
             var hud = UIHud.Instance ? UIHud.Instance : FindController<UIHud>(true);
             hud?.ForceRefreshGameOverUI();
@@ -143,14 +155,12 @@ namespace CatchTheFruit
 
         public void OnOptionsFromMain()
         {
-            _optionsFromPause = false;
             PauseManager.Instance?.ResumeForce();
             ApplyState(UiState.Options);
         }
 
         public void OnOptionsFromPause()
         {
-            _optionsFromPause = true;
             ApplyState(UiState.Options);
         }
 
@@ -189,7 +199,6 @@ namespace CatchTheFruit
                 case UiState.GameOver:   SafeSetActive(gameOverPanel, true);   break;
                 case UiState.Options:    SafeSetActive(optionsPanel, true);    break;
             }
-
             _state = target;
         }
 

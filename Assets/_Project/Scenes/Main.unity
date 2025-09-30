@@ -4275,7 +4275,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &977965405
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7848,7 +7848,12 @@ MonoBehaviour:
   prewarmCount: 24
   poolRoot: {fileID: 0}
   globalFallSpeed: 10
-  maxAlive: 10
+  maxAlive: 14
+  hardMinInterval: 0.24
+  hardMaxAlive: 24
+  crowdThreshold: 12
+  crowdIntervalBoost: 1.35
+  maxSpeedMulCap: 2.2
   verboseLogs: 0
 --- !u!4 &1662621783
 Transform:
