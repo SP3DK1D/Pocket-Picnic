@@ -3,12 +3,16 @@
   "WorkspaceRootPath": "D:\\yt vids\\My project\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{E8A91009-7186-A382-4FE4-3C21BA335F00}|Assembly-CSharp-Editor.csproj|d:\\yt vids\\my project\\assets\\_project\\editor\\addatttoplist.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E8A91009-7186-A382-4FE4-3C21BA335F00}|Assembly-CSharp-Editor.csproj|solutionrelative:assets\\_project\\editor\\addatttoplist.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:1:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|d:\\yt vids\\my project\\assets\\_project\\scripts\\utility\\openurlbutton.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:1:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\utility\\openurlbutton.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\utility\\openurlbutton.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\utility\\openurlbutton.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{E8A91009-7186-A382-4FE4-3C21BA335F00}|Assembly-CSharp-Editor.csproj|D:\\yt vids\\My project\\assets\\_project\\editor\\dummyeditor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E8A91009-7186-A382-4FE4-3C21BA335F00}|Assembly-CSharp-Editor.csproj|solutionrelative:assets\\_project\\editor\\dummyeditor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E8A91009-7186-A382-4FE4-3C21BA335F00}|Assembly-CSharp-Editor.csproj|D:\\yt vids\\My project\\assets\\_project\\editor\\addatttoplist.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E8A91009-7186-A382-4FE4-3C21BA335F00}|Assembly-CSharp-Editor.csproj|solutionrelative:assets\\_project\\editor\\addatttoplist.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|D:\\yt vids\\My project\\assets\\_project\\scripts\\utility\\heartlivesui.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -51,8 +55,12 @@
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\_Project\\Scripts\\Utility\\UISafeCornerAnchor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\yt vids\\My project\\assets\\_project\\scripts\\utility\\restorepurchasesbuttoniap.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:assets\\_project\\scripts\\utility\\restorepurchasesbuttoniap.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\RestorePurchasesButtonIAP.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\_Project\\Scripts\\Utility\\RestorePurchasesButtonIAP.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:2:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|d:\\yt vids\\my project\\assets\\_project\\scripts\\utility\\openurlbutton.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:2:0:{32C3BDE6-E125-3128-82C1-25D0441455A3}|Assembly-CSharp.csproj|solutionrelative:assets\\_project\\scripts\\utility\\openurlbutton.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -62,36 +70,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "AddATTToPlist.cs",
-              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Editor\\AddATTToPlist.cs",
-              "RelativeDocumentMoniker": "Assets\\_Project\\Editor\\AddATTToPlist.cs",
-              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Editor\\AddATTToPlist.cs",
-              "RelativeToolTip": "Assets\\_Project\\Editor\\AddATTToPlist.cs",
-              "ViewState": "AgIAAAsAAAAAAAAAAAAcwCEAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-30T02:16:24.295Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "RestorePurchasesButtonIAP.cs",
-              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\RestorePurchasesButtonIAP.cs",
-              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Utility\\RestorePurchasesButtonIAP.cs",
-              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\RestorePurchasesButtonIAP.cs",
-              "RelativeToolTip": "Assets\\_Project\\Scripts\\Utility\\RestorePurchasesButtonIAP.cs",
-              "ViewState": "AgIAABMAAAAAAAAAAAAIwCgAAAAwAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-30T01:52:57.342Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 14,
               "Title": "OpenUrlButton.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\OpenUrlButton.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Utility\\OpenUrlButton.cs",
@@ -99,23 +82,25 @@
               "RelativeToolTip": "Assets\\_Project\\Scripts\\Utility\\OpenUrlButton.cs",
               "ViewState": "AgIAAAQAAAAAAAAAAAAAAAkAAAAbAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-30T01:35:47.822Z"
+              "WhenOpened": "2025-09-30T01:35:47.822Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "LifeManager.cs",
-              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\LifeManager.cs",
-              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Managers\\LifeManager.cs",
-              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\LifeManager.cs",
-              "RelativeToolTip": "Assets\\_Project\\Scripts\\Managers\\LifeManager.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 0,
+              "Title": "OpenUrlButton.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\OpenUrlButton.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Utility\\OpenUrlButton.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\OpenUrlButton.cs",
+              "RelativeToolTip": "Assets\\_Project\\Scripts\\Utility\\OpenUrlButton.cs",
+              "ViewState": "AgIAAAQAAAAAAAAAAAAAAAkAAAAbAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-30T00:05:54.856Z"
+              "WhenOpened": "2025-09-30T01:35:47.822Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "SafeAreaDock.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\SafeAreaDock.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Utility\\SafeAreaDock.cs",
@@ -127,7 +112,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "HeartLivesUI.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\HeartLivesUI.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Utility\\HeartLivesUI.cs",
@@ -139,7 +124,31 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 6,
+              "Title": "LifeManager.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\LifeManager.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Managers\\LifeManager.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\LifeManager.cs",
+              "RelativeToolTip": "Assets\\_Project\\Scripts\\Managers\\LifeManager.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-30T00:05:54.856Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "RestorePurchasesButtonIAP.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\RestorePurchasesButtonIAP.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Utility\\RestorePurchasesButtonIAP.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\RestorePurchasesButtonIAP.cs",
+              "RelativeToolTip": "Assets\\_Project\\Scripts\\Utility\\RestorePurchasesButtonIAP.cs",
+              "ViewState": "AgIAABMAAAAAAAAAAAAIwCgAAAAwAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-30T01:52:57.342Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
               "Title": "MenuFlowController.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\MenuFlowController.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\UI\\MenuFlowController.cs",
@@ -151,7 +160,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "UIMenuController.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\UIMenuController.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\UI\\UIMenuController.cs",
@@ -163,7 +172,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "PowerupOverlay.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\UI\\PowerupOverlay.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\UI\\PowerupOverlay.cs",
@@ -175,7 +184,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "SafeAreaPanel.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\SafeAreaPanel.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Utility\\SafeAreaPanel.cs",
@@ -187,7 +196,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "SafeAreaFitter.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\SafeAreaFitter.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Utility\\SafeAreaFitter.cs",
@@ -198,7 +207,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 12,
               "Title": "UISafeCornerAnchor.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Utility\\UISafeCornerAnchor.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Utility\\UISafeCornerAnchor.cs",
@@ -210,7 +219,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 11,
               "Title": "OptionManager.cs",
               "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Scripts\\Managers\\OptionManager.cs",
               "RelativeDocumentMoniker": "Assets\\_Project\\Scripts\\Managers\\OptionManager.cs",
@@ -219,6 +228,30 @@
               "ViewState": "AgIAAHMAAAAAAAAAAAAxwHsAAAA2AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-29T20:32:45.268Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "DummyEditor.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Editor\\DummyEditor.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Editor\\DummyEditor.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Editor\\DummyEditor.cs",
+              "RelativeToolTip": "Assets\\_Project\\Editor\\DummyEditor.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-30T03:40:40.285Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "AddATTToPlist.cs",
+              "DocumentMoniker": "D:\\yt vids\\My project\\Assets\\_Project\\Editor\\AddATTToPlist.cs",
+              "RelativeDocumentMoniker": "Assets\\_Project\\Editor\\AddATTToPlist.cs",
+              "ToolTip": "D:\\yt vids\\My project\\Assets\\_Project\\Editor\\AddATTToPlist.cs",
+              "RelativeToolTip": "Assets\\_Project\\Editor\\AddATTToPlist.cs",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAcwCEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-30T02:16:24.295Z"
             }
           ]
         }
