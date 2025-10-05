@@ -4,45 +4,35 @@ using UnityEngine;
 namespace CatchTheFruit
 {
     /// <summary>
-    /// Central menu flow controller:
-    /// Main → Difficulty → HUD/Game. Also Pause, GameOver, Restart, Options.
-    /// Singleton guard prevents duplicate handlers from fighting each other.
+    /// Menu flow: Main → Difficulty → Game (HUD).
+    /// Also Pause, Options, Game Over, Restart, Back to Menu.
+    ///
+    /// IMPORTANT:
+    /// - Assign ALL panels (including Game Over) in the inspector.
+    /// - Hook your "Play Again" button to OnPlayAgainFromGameOver().
     /// </summary>
     public class MenuFlowController : MonoBehaviour
     {
-        public static MenuFlowController Instance { get; private set; }
-
-        public enum UiState { MainMenu, Difficulty, Hud, Pause, GameOver, Options }
-
         [Header("Panels")]
         [SerializeField] private GameObject mainMenuPanel;
         [SerializeField] private GameObject difficultyPanel;
         [SerializeField] private GameObject hudPanel;
         [SerializeField] private GameObject pausePanel;
-        [SerializeField] private GameObject gameOverPanel;
         [SerializeField] private GameObject optionsPanel;
+        [SerializeField] private GameObject gameOverPanel;   // NEW: must be assigned
 
         [Header("Optional")]
         [SerializeField] private GameObject player;
-        [SerializeField] private FruitSpawner gameplaySpawner;
-        [SerializeField] private MenuFruitRain menuRain;
         [SerializeField] private bool autoShowMainOnAwake = true;
 
-        private UiState _state = UiState.MainMenu;
+        bool _optionsFromPause;
 
         void Awake()
         {
-            if (Instance && Instance != this) { Destroy(gameObject); return; }
-            Instance = this;
-
-            RunState.SetGameplay(false);
-
             if (autoShowMainOnAwake)
             {
-                ApplyState(UiState.MainMenu, ensureTimeScale: true);
+                ShowOnly(mainMenuPanel);
                 SafeSetActive(player, false);
-                if (menuRain) menuRain.gameObject.SetActive(true);
-                if (gameplaySpawner) gameplaySpawner.StopAndClear();
             }
         }
 
@@ -51,155 +41,151 @@ namespace CatchTheFruit
             GameEvents.OnGameStart += HandleGameStart;
             GameEvents.OnGameOver  += HandleGameOver;
         }
+
         void OnDisable()
         {
             GameEvents.OnGameStart -= HandleGameStart;
             GameEvents.OnGameOver  -= HandleGameOver;
         }
 
-        // ===== Game lifecycle =====
-
+        // ===== Event handlers =====
         void HandleGameStart()
         {
-            RunState.SetGameplay(true);
+            // Ensure gameplay time and panels
             PauseManager.Instance?.ResumeForce();
-            if (menuRain) menuRain.gameObject.SetActive(false);
-
+            ShowOnly(hudPanel);
             SafeSetActive(player, true);
-            ApplyState(UiState.Hud);
 
+            // Hearts fresh at start
             HeartLivesUI.ResetAllToFull();
         }
 
         void HandleGameOver()
         {
-            RunState.SetGameplay(false);
-            PauseManager.Instance?.ResumeForce();
+            // Always show Game Over panel (not Main Menu)
+            PauseManager.Instance?.ResumeForce(); // normalize timeScale after Freeze
             SafeSetActive(player, false);
 
             if (gameOverPanel)
-                ApplyState(UiState.GameOver);
+            {
+                ShowOnly(gameOverPanel);
+            }
             else
             {
-                Debug.LogWarning("[MenuFlow] GameOver panel not assigned; falling back to MainMenu.");
-                ApplyState(UiState.MainMenu);
+                Debug.LogWarning("[MenuFlowController] GameOver panel not assigned. Falling back to Main Menu.");
+                ShowOnly(mainMenuPanel);
             }
 
+            // Let HUD update any final UI numbers if needed
             var hud = UIHud.Instance ? UIHud.Instance : FindController<UIHud>(true);
             hud?.ForceRefreshGameOverUI();
         }
 
-        // ===== Main Menu / Difficulty =====
+        // ===== Main Menu =====
+        public void OnStartPressed() => ShowOnly(difficultyPanel);
 
-        public void OnStartPressed() => ApplyState(UiState.Difficulty);
+        public void OnPickEasy()   { DifficultyManager.PickEasy();   BeginGame(); }
+        public void OnPickMedium() { DifficultyManager.PickMedium(); BeginGame(); }
+        public void OnPickHard()   { DifficultyManager.PickHard();   BeginGame(); }
 
-        public void OnPickEasy()   { DifficultyManager.PickEasy();   GameEvents.RaiseGameStart(); }
-        public void OnPickMedium() { DifficultyManager.PickMedium(); GameEvents.RaiseGameStart(); }
-        public void OnPickHard()   { DifficultyManager.PickHard();   GameEvents.RaiseGameStart(); }
-
-        // ===== GameOver flow =====
-
-        public void OnPlayAgainFromGameOver()
+        void BeginGame()
         {
-            RunState.SetGameplay(false);
-            PauseManager.Instance?.ResumeForce();
-            SafeSetActive(player, false);
-            DifficultyManager.ClearCurrent();
-
-            if (gameplaySpawner) gameplaySpawner.StopAndClear();
-
-            ApplyState(UiState.Difficulty, ensureTimeScale: true);
-            AudioHub.I?.PlayButton();
-        }
-
-        public void OnBackToMenu()
-        {
-            RunState.SetGameplay(false);
-            PauseManager.Instance?.ResumeForce();
-            SafeSetActive(player, false);
-            DifficultyManager.ClearCurrent();
-
-            if (gameplaySpawner) gameplaySpawner.StopAndClear();
-            if (menuRain) menuRain.gameObject.SetActive(true);
-
-            ApplyState(UiState.MainMenu, ensureTimeScale: true);
+            ShowOnly(hudPanel);
+            SafeSetActive(player, true);
+            GameEvents.RaiseGameStart();   // spawner, timers, etc.
         }
 
         // ===== Pause flow =====
-
         public void OnPause()
         {
             PauseManager.Instance?.Pause();
-            ApplyState(UiState.Pause);
+            ShowOnly(pausePanel);
         }
 
         public void OnResume()
         {
             PauseManager.Instance?.Resume();
-            ApplyState(UiState.Hud);
+            ShowOnly(hudPanel);
         }
 
+        // ===== Restart (in-run) =====
         public void OnRestart()
         {
+            // Hard restart from pause/in-run: end then begin immediately.
             PauseManager.Instance?.ResumeForce();
-            GameEvents.RaiseGameOver();
-            GameEvents.RaiseGameStart();
-
+            ShowOnly(hudPanel);
+            GameEvents.RaiseGameOver();    // clear/stop systems listening to over
+            GameEvents.RaiseGameStart();   // start fresh
             HeartLivesUI.ResetAllToFull();
-
             SafeSetActive(player, true);
-            ApplyState(UiState.Hud);
+        }
+
+        // ===== Back to Menu =====
+        public void OnBackToMenu()
+        {
+            PauseManager.Instance?.ResumeForce();
+            ShowOnly(mainMenuPanel);
+            GameEvents.RaiseGameOver();
+            DifficultyManager.ClearCurrent();
+            SafeSetActive(player, false);
         }
 
         // ===== Options =====
-
         public void OnOptionsFromMain()
         {
+            _optionsFromPause = false;
             PauseManager.Instance?.ResumeForce();
-            ApplyState(UiState.Options);
+            if (!optionsPanel) { Debug.LogError("[MenuFlowController] Options panel not assigned."); return; }
+            ShowOnly(optionsPanel);
         }
 
         public void OnOptionsFromPause()
         {
-            ApplyState(UiState.Options);
+            _optionsFromPause = true;
+            if (!optionsPanel) { Debug.LogError("[MenuFlowController] Options panel not assigned."); return; }
+            ShowOnly(optionsPanel);
         }
 
         public void OnOptionsClose()
         {
             if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
             {
-                ApplyState(UiState.Pause);
-                PauseManager.Instance.Pause();
+                ShowOnly(pausePanel);
+                PauseManager.Instance.Pause(); // re-assert paused state
             }
             else
             {
-                ApplyState(UiState.MainMenu, ensureTimeScale: true);
+                ShowOnly(mainMenuPanel);
             }
         }
 
-        // ===== Helpers =====
-
-        void ApplyState(UiState target, bool ensureTimeScale = false)
+        // ===== Game Over actions =====
+        /// <summary>
+        /// Hook this to the "Play Again" button on the Game Over screen.
+        /// Goes to difficulty selection and closes Game Over.
+        /// </summary>
+        public void OnPlayAgainFromGameOver()
         {
-            SafeSetActive(mainMenuPanel, false);
-            SafeSetActive(difficultyPanel, false);
-            SafeSetActive(hudPanel, false);
-            SafeSetActive(pausePanel, false);
-            SafeSetActive(gameOverPanel, false);
-            SafeSetActive(optionsPanel, false);
+            PauseManager.Instance?.ResumeForce();
+            ShowOnly(difficultyPanel);
+            // Do NOT start the run yet; waits for the player to pick a difficulty.
+        }
 
-            if (ensureTimeScale) PauseManager.Instance?.ResumeForce();
-
-            switch (target)
+        // ===== Helpers =====
+        void ShowOnly(GameObject toShow)
+        {
+            if (!toShow)
             {
-                case UiState.MainMenu:   SafeSetActive(mainMenuPanel, true);   break;
-                case UiState.Difficulty: SafeSetActive(difficultyPanel, true); break;
-                case UiState.Hud:        SafeSetActive(hudPanel, true);        break;
-                case UiState.Pause:      SafeSetActive(pausePanel, true);      break;
-                case UiState.GameOver:   SafeSetActive(gameOverPanel, true);   break;
-                case UiState.Options:    SafeSetActive(optionsPanel, true);    break;
+                Debug.LogError("[MenuFlowController] ShowOnly() got null.", this);
+                return;
             }
-            _state = target;
+
+            if (mainMenuPanel)  mainMenuPanel.SetActive(toShow == mainMenuPanel);
+            if (difficultyPanel) difficultyPanel.SetActive(toShow == difficultyPanel);
+            if (hudPanel)       hudPanel.SetActive(toShow == hudPanel);
+            if (pausePanel)     pausePanel.SetActive(toShow == pausePanel);
+            if (optionsPanel)   optionsPanel.SetActive(toShow == optionsPanel);
+            if (gameOverPanel)  gameOverPanel.SetActive(toShow == gameOverPanel);
         }
 
         static T FindController<T>(bool includeInactive = false) where T : MonoBehaviour

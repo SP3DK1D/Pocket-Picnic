@@ -7,10 +7,11 @@ namespace CatchTheFruit
 {
     /// <summary>
     /// Spawns Fruit using a SpawnTable with internal object pooling.
-    /// - Spawn pacing: currentInterval decays toward minInterval, then divided by SpawnRateRamp()
+    /// - Spawn pacing: currentInterval decays toward minInterval, then divided by DifficultyManager.SpawnRateRamp()
     ///   and randomized slightly to keep it organic.
     /// - Fall speed: SpawnTable.fallSpeedMultiplier × global × Difficulty × FallSpeedRamp() × wave.
     /// - Safety: hardMinInterval, maxAlive/hardMaxAlive, crowd governor.
+    /// - Bomb lane safety: bombs avoid spawning too close (same row) to fruits near the spawn line.
     /// </summary>
     public class FruitSpawner : MonoBehaviour
     {
@@ -49,6 +50,16 @@ namespace CatchTheFruit
         [Header("Speed Ramp Clamp")]
         [Tooltip("Clamp total fall-speed multiplier (difficulty × time × wave × global).")]
         [Min(1f)] public float maxSpeedMulCap = 2.35f;
+
+        [Header("Bomb Safety (same-row separation)")]
+        [Tooltip("Horizontal separation required between a newly-spawned bomb and any fruit near the spawn line.")]
+        [Min(0.1f)] public float bombMinSeparationX = 1.0f;
+
+        [Tooltip("Vertical window around spawnY considered the same 'row' for the safety check.")]
+        [Min(0.05f)] public float sameRowWindowY = 0.6f;
+
+        [Tooltip("How many times to try new X for a bomb before giving up this tick.")]
+        [Min(1)] public int bombSpawnMaxTries = 8;
 
         [Header("Debug")]
         [SerializeField] private bool verboseLogs = false;
@@ -234,8 +245,13 @@ namespace CatchTheFruit
             var fd = spawnTable ? spawnTable.Pick() : null;
             if (!fd) return;
 
-            float halfWidth = ComputeHalfWidth();
-            float x = URandom.Range(-halfWidth, halfWidth);
+            // Choose a safe X. For bombs, avoid "same row" proximity to any fruit near spawn line.
+            if (!TryFindSpawnXFor(fd, out float x))
+            {
+                if (verboseLogs) Debug.Log("[Spawner] Skipped bomb spawn this tick (no safe lane found).");
+                return; // skip this tick if we can't place bomb safely
+            }
+
             float y = config.spawnY;
 
             var f = GetFromPool(new Vector3(x, y, 0f), Quaternion.identity);
@@ -254,6 +270,65 @@ namespace CatchTheFruit
 
             if (verboseLogs)
                 Debug.Log($"[Spawner] + {fd.id} @x={x:0.00}, fallMul={mul:0.##}, alive={Fruit.Active.Count}");
+        }
+
+        /// <summary>
+        /// Finds a spawn X for the given fruit data. For bombs, avoids placing too close
+        /// (horizontally) to any non-bomb fruit currently near the spawnY "row".
+        /// </summary>
+        bool TryFindSpawnXFor(FruitData fd, out float x)
+        {
+            float halfWidth = ComputeHalfWidth();
+
+            // Non-bombs can just spawn anywhere
+            if (fd == null || !fd.isBomb)
+            {
+                x = URandom.Range(-halfWidth, halfWidth);
+                return true;
+            }
+
+            // Bombs: try multiple random lanes that don't conflict
+            for (int attempt = 0; attempt < bombSpawnMaxTries; attempt++)
+            {
+                float candidate = URandom.Range(-halfWidth, halfWidth);
+                if (IsBombXSafe(candidate))
+                {
+                    x = candidate;
+                    return true;
+                }
+            }
+
+            // Couldn’t find a safe lane this tick
+            x = 0f;
+            return false;
+        }
+
+        /// <summary>
+        /// Returns true if placing a bomb at x would NOT be too close to any existing non-bomb fruit
+        /// in the same "row" (|y - spawnY| <= sameRowWindowY).
+        /// </summary>
+        bool IsBombXSafe(float bombX)
+        {
+            if (Fruit.Active.Count == 0) return true;
+
+            float rowMinY = config.spawnY - sameRowWindowY;
+            float rowMaxY = config.spawnY + sameRowWindowY;
+
+            // Check against active fruits (non-bombs) near the spawn line
+            // Note: using foreach on HashSet is fine; Active is small.
+            foreach (var f in Fruit.Active)
+            {
+                if (!f || f.decorative) continue;
+                if (f.data != null && f.data.isBomb) continue; // only care about non-bomb fruit blockers
+
+                Vector3 p = f.transform.position;
+                if (p.y < rowMinY || p.y > rowMaxY) continue; // not in the same row window
+
+                if (Mathf.Abs(p.x - bombX) < bombMinSeparationX)
+                    return false; // too close horizontally to a fruit in the same row
+            }
+
+            return true;
         }
 
         float ComputeHalfWidth()

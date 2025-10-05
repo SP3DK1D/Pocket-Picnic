@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿// Assets/_Project/Scripts/Gameplay/Fruit.cs
+using UnityEngine;
 using System.Collections.Generic;
 using URandom = UnityEngine.Random;
 
@@ -24,11 +25,13 @@ namespace CatchTheFruit
         // Cached helpers
         SpriteRenderer _sr;
 
-        // Convenience props (used by BasketCatchZone)
+        // Convenience flags (kept for compatibility with other systems)
         public bool IsBomb => data != null && data.isBomb;
         public bool IsPowerupCarrier => data != null && data.powerup != null;
-        public bool IsCatchable => !decorative && (!IsBomb);
-        public Vector2 Position2D => transform.position;
+
+        // === Legacy compatibility for BasketCatchZone ===
+        public bool IsCatchable => !decorative && !IsBomb;
+        public Vector2 Position2D => transform.position;   // <- ADDED
 
         void OnEnable() { Active.Add(this); }
         void OnDisable() { Active.Remove(this); }
@@ -50,11 +53,15 @@ namespace CatchTheFruit
                 _sr.color = fd.tint;
             }
 
-            // Fall speed with a solid floor
+            // Base fall speed from data
             float min = (fd != null) ? Mathf.Max(6f, fd.minFallSpeed) : 6f;
             float max = (fd != null) ? Mathf.Max(min + 3f, fd.maxFallSpeed) : (min + 4f);
             float mul = Mathf.Max(0.5f, speedMultiplier);
-            fallSpeed = Mathf.Max(3.2f, URandom.Range(min, max) * mul);
+
+            // Progressive ramp + per-fruit variance
+            float timeRamp = DifficultyManager.HasCurrent ? DifficultyManager.FallSpeedRamp() : 1f;
+            float baseSpeed = URandom.Range(min, max) * mul * timeRamp;
+            fallSpeed = Mathf.Max(3.2f, baseSpeed * URandom.Range(0.90f, 1.15f));
 
             // Random tumble
             _tumbleDir = (URandom.value < 0.5f) ? -1 : 1;
@@ -106,36 +113,97 @@ namespace CatchTheFruit
             }
         }
 
-        // ----- Catch entry points (called by BasketCatchZone) -----
-        public void RaiseCaughtFruit()
+        // ----- Trigger path (if basket collider listens via physics) -----
+        void OnTriggerEnter2D(Collider2D other)
         {
-            int score = (data != null) ? data.scoreValue : 0;
-            GameEvents.RaiseFruitCaught(data?.id ?? "?", score, false);
-            if (IsPowerupCarrier) GameEvents.RaisePowerupPicked(data.powerup);
-            Retire();
+            if (!other.CompareTag("Player")) return;
+            if (decorative) { Retire(); return; }
+            HandleAutoCaught();
         }
 
-        public void RaiseCaughtSafe()
-        {
-            int score = (data != null) ? data.scoreValue : 0;
-            GameEvents.RaiseFruitCaught(data?.id ?? "?", score, false);
-            if (IsPowerupCarrier) GameEvents.RaisePowerupPicked(data.powerup);
-            Retire();
-        }
+        // ===== Public API (compat for BasketCatchZone) =====
 
-        public void RaiseCaughtBomb()
-        {
-            int score = (data != null) ? data.scoreValue : 0;
-            GameEvents.RaiseFruitCaught(data?.id ?? "?", score, true);
-            if (IsPowerupCarrier) GameEvents.RaisePowerupPicked(data.powerup);
-            VFXManager.Instance?.PlayBombExplosion(transform.position);
-            Retire();
-        }
-
+        /// <summary>Legacy helper used by BasketCatchZone to gently pull fruit.</summary>
         public void Nudge(Vector2 delta)
         {
             if (decorative) return;
             transform.position += (Vector3)delta;
+        }
+
+        /// <summary>Force a normal (non-bomb) catch.</summary>
+        public void RaiseCaughtFruit()
+        {
+            if (data != null && data.id == "coin") { DoCoinCatch(); return; }
+            DoNormalCatch(isFromShield: false);
+        }
+
+        /// <summary>Force a safe catch (e.g., bomb blocked by shield).</summary>
+        public void RaiseCaughtSafe()
+        {
+            if (data != null && data.id == "coin") { DoCoinCatch(); return; }
+            DoNormalCatch(isFromShield: true);
+        }
+
+        /// <summary>Force a bomb catch (no shield involved).</summary>
+        public void RaiseCaughtBomb()
+        {
+            DoBombCatch();
+        }
+
+        // ===== Internal catch handling =====
+
+        void HandleAutoCaught()
+        {
+            // Coin fruit bypass
+            if (data != null && data.id == "coin") { DoCoinCatch(); return; }
+
+            if (IsBomb)
+            {
+                // Try to consume shield
+                if (PowerupManager.ConsumeShieldIfActive())
+                {
+                    AudioHub.I?.PlayShieldBreak();
+                    DoNormalCatch(isFromShield: true);
+                    return;
+                }
+
+                // No shield
+                DoBombCatch();
+                return;
+            }
+
+            // Normal fruit
+            DoNormalCatch(isFromShield: false);
+        }
+
+        void DoCoinCatch()
+        {
+            QuestManager.Instance?.AddCoins(1);
+            AudioHub.I?.PlayPickup();
+            GameEvents.RaiseFruitCaught(data?.id ?? "coin", 0, false);
+            Retire();
+        }
+
+        void DoNormalCatch(bool isFromShield)
+        {
+            int score = (data != null) ? data.scoreValue : 0;
+            GameEvents.RaiseFruitCaught(data?.id ?? "?", score, false);
+
+            if (IsPowerupCarrier)
+                GameEvents.RaisePowerupPicked(data.powerup);
+
+            AudioHub.I?.PlayPickup();
+            Retire();
+        }
+
+        void DoBombCatch()
+        {
+            int score = (data != null) ? data.scoreValue : 0;
+            GameEvents.RaiseFruitCaught(data?.id ?? "?", score, true);
+            if (IsPowerupCarrier)
+                GameEvents.RaisePowerupPicked(data.powerup);
+            VFXManager.Instance?.PlayBombExplosion(transform.position);
+            Retire();
         }
 
         public void Retire()
