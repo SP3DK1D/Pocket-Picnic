@@ -8112,16 +8112,8 @@ MonoBehaviour:
   fruitPrefab: {fileID: 1795009156983806590, guid: 8dfe780f112f91840bb3836a49df9fdd, type: 3}
   prewarmCount: 24
   poolRoot: {fileID: 0}
-  globalFallSpeed: 7
-  maxAlive: 14
-  hardMinInterval: 0.24
-  hardMaxAlive: 24
-  crowdThreshold: 12
-  crowdIntervalBoost: 1.35
-  maxSpeedMulCap: 2
-  bombMinSeparationX: 1
-  sameRowWindowY: 0.6
-  bombSpawnMaxTries: 6
+  globalFallSpeed: 10
+  maxAlive: 10
   verboseLogs: 0
 --- !u!4 &1662621783
 Transform:
