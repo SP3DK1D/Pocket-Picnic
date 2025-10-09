@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Medium
   m_EditorClassIdentifier: 
   displayName: Medium
-  gravityScale: 1.9
-  maxFallSpeed: 9
+  gravityScale: 1.3
+  maxFallSpeed: 7
   initialDownBoost: 0.5
-  spawnIntervalMul: 1
-  speedMultiplier: 1
+  spawnIntervalMul: 0.768
+  speedMultiplier: 0.854

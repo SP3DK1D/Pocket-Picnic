@@ -5,77 +5,52 @@ using static CatchTheFruit.PowerupDef;
 
 namespace CatchTheFruit
 {
-    /// <summary>
-    /// Central power-up controller (safe version).
-    /// Uses inspector defaults only and raises events for overlay/score/VFX/haptics.
-    /// Freeze now slows falling by scaling Physics2D.gravity (not Time.timeScale),
-    /// so player input/movement/UI remain identical during Freeze.
-    /// </summary>
     public class PowerupManager : MonoBehaviour
     {
-        // ===== Singleton =====
         public static PowerupManager Instance { get; private set; }
 
-        // ===== Freeze visibility for debugging / guards =====
-        public static bool FreezeActive { get; private set; }
-
-        // ===== Magnet data read by Fruit.cs =====
-        public static bool MagnetActive { get; private set; }
-        public static float MagnetRadius { get; private set; }
-        public static float MagnetPullSpeed { get; private set; }
+        public static bool   FreezeActive { get; private set; }
+        public static float  FreezeSpeedMul { get; private set; } = 1f;
+        public static bool   MagnetActive { get; private set; }
+        public static float  MagnetRadius { get; private set; }
+        public static float  MagnetPullSpeed { get; private set; }
         public static Transform PlayerTransform { get; private set; }
+        public static bool   ShieldIsActive => Instance && Instance._shieldActive;
+        public static bool   ConsumeShieldIfActive() => Instance && Instance.TryConsumeShieldHit();
 
-        // ===== Shield (static accessors) =====
-        public static bool ShieldIsActive => Instance != null && Instance._shieldActive;
-        public static bool ConsumeShieldIfActive() => Instance != null && Instance.TryConsumeShieldHit();
+        [Header("Player (for Magnet)")]
+        [SerializeField] private Transform player;
 
-        [Header("Player (used by Magnet)")]
-        [SerializeField] private Transform player; // auto-find by Tag=Player if null
-
-        [Header("Freeze (GravityScale) — defaults")]
-        [Tooltip("Gravity multiplier during Freeze (e.g., 0.2 = 20% of normal fall speed).")]
-        [SerializeField, Range(0.01f, 1f)] private float freezeScale = 0.20f;
-        [SerializeField, Min(0.1f)] private float freezeDuration = 2.5f;
-
-        [Header("Score Multiplier — defaults")]
-        [SerializeField, Min(1f)] private float scoreMultiplier = 2f;
-        [SerializeField, Min(0.1f)] private float scoreMultDuration = 7f;
-
-        [Header("Magnet — defaults")]
-        [SerializeField, Min(0.1f)] private float magnetRadius = 5.5f;
-        [SerializeField, Min(0.1f)] private float magnetPullSpeed = 12f;
-        [SerializeField, Min(0.1f)] private float magnetDuration = 7f;
-
-        [Header("Shield — defaults")]
-        [SerializeField, Min(0f)] private float shieldDuration = 0f;  // 0 = until consumed
+        [Header("Optional Overrides (leave null to use pickup def)")]
+        [SerializeField] private PowerupDef freezeDef;
+        [SerializeField] private PowerupDef scoreDef;
+        [SerializeField] private PowerupDef magnetDef;
+        [SerializeField] private PowerupDef shieldDef;
+        [SerializeField] private PowerupDef clearDef;
 
         [Header("Debug")]
         [SerializeField] private bool verboseLogs = false;
 
-        // ===== Runtime =====
         Coroutine _freezeCo, _multCo, _magnetCo, _shieldCo;
         bool _shieldActive;
         float _shieldEndAt = 0f;
-
-        // marks that EndShield() is happening due to a bomb hit (not timeout)
         bool _shieldConsumedByHit;
 
-        // Store original global gravity so Freeze can restore it exactly
         Vector2 _origGravity2D;
-        bool _origGravityCaptured = false;
+        bool _origGravityCaptured;
 
         void Awake()
         {
+            if (Instance && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
 
             if (!player)
             {
-                var pGo = GameObject.FindGameObjectWithTag("Player");
-                if (pGo) player = pGo.transform;
+                var p = GameObject.FindGameObjectWithTag("Player");
+                if (p) player = p.transform;
             }
             PlayerTransform = player;
 
-            // capture original gravity at boot
             _origGravity2D = Physics2D.gravity;
             _origGravityCaptured = true;
         }
@@ -83,193 +58,195 @@ namespace CatchTheFruit
         void OnEnable()
         {
             GameEvents.OnPowerupPicked += OnPicked;
-            GameEvents.OnGameStart += OnStart;
-            GameEvents.OnGameOver += OnOver;
+            GameEvents.OnGameStart     += OnStart;
+            GameEvents.OnGameOver      += OnOver;
         }
-
         void OnDisable()
         {
             GameEvents.OnPowerupPicked -= OnPicked;
-            GameEvents.OnGameStart -= OnStart;
-            GameEvents.OnGameOver -= OnOver;
+            GameEvents.OnGameStart     -= OnStart;
+            GameEvents.OnGameOver      -= OnOver;
 
-            EndAllEffectsImmediate(); // restores gravity, ends powerups
-
+            EndAllImmediate();
             if (Instance == this) Instance = null;
         }
 
         void Update()
         {
             if (_shieldActive && _shieldEndAt > 0f && Time.unscaledTime >= _shieldEndAt)
-                EndShield(); // ends by TIMEOUT
+                EndShield(); // timeout
         }
 
-        // ===== Event handlers =====
+        void OnValidate()
+        {
+            CheckKind("freezeDef", freezeDef, PowerupKind.TimeScale);
+            CheckKind("scoreDef",  scoreDef,  PowerupKind.ScoreMultiplier);
+            CheckKind("magnetDef", magnetDef, PowerupKind.Magnet);
+            CheckKind("shieldDef", shieldDef, PowerupKind.Shield);
+            CheckKind("clearDef",  clearDef,  PowerupKind.ClearScreen);
+        }
+        static void CheckKind(string field, PowerupDef d, PowerupKind expected)
+        {
+            if (d && d.kind != expected)
+                Debug.LogWarning($"[PowerupManager] {field} expects {expected} but has {d.kind}. Using pickup def at runtime.", d);
+        }
+
         void OnStart()
         {
-            EndAllEffectsImmediate();
+            EndAllImmediate();
             PlayerTransform = player ? player : PlayerTransform;
         }
-
-        void OnOver()
-        {
-            EndAllEffectsImmediate();
-        }
+        void OnOver() => EndAllImmediate();
 
         void OnPicked(PowerupDef def)
         {
-            if (def == null) return;
-            switch (def.kind)
+            if (!def) return;
+            var used = ChooseDef(def.kind, def);
+
+            switch (used.kind)
             {
-                case PowerupKind.TimeScale:       ActivateFreeze();          break; // name kept for compatibility
-                case PowerupKind.ScoreMultiplier: ActivateScoreMultiplier(); break;
-                case PowerupKind.Magnet:          ActivateMagnet();          break;
-                case PowerupKind.Shield:          ActivateShield();          break;
-                case PowerupKind.ClearScreen:     DoClearScreen();           break;
+                case PowerupKind.TimeScale:       StartFreeze(used);          break;
+                case PowerupKind.ScoreMultiplier: StartScoreMultiplier(used); break;
+                case PowerupKind.Magnet:          StartMagnet(used);          break;
+                case PowerupKind.Shield:          StartShield(used);          break;
+                case PowerupKind.ClearScreen:     DoClear(used);              break;
             }
         }
 
-        // ===== Freeze (now scales Physics2D.gravity, not Time.timeScale) =====
-        public void ActivateFreeze()
+        PowerupDef ChooseDef(PowerupKind kind, PowerupDef fallback)
         {
-            if (_freezeCo != null) StopCoroutine(_freezeCo);
-            _freezeCo = StartCoroutine(CoFreeze());
+            PowerupDef pick = kind switch
+            {
+                PowerupKind.TimeScale       => freezeDef,
+                PowerupKind.ScoreMultiplier => scoreDef,
+                PowerupKind.Magnet          => magnetDef,
+                PowerupKind.Shield          => shieldDef,
+                PowerupKind.ClearScreen     => clearDef,
+                _ => null
+            };
+            if (pick && pick.kind != kind)
+            {
+                Debug.LogWarning($"[PowerupManager] Override mismatch: wanted {kind}, got {pick.kind}. Fallback to pickup def.", pick);
+                pick = null;
+            }
+            return pick ? pick : fallback;
         }
 
-        IEnumerator CoFreeze()
+        // ---------- Freeze ----------
+        void StartFreeze(PowerupDef def)
         {
-            float dur = Mathf.Max(0.1f, freezeDuration);
-            float gMul = Mathf.Clamp(freezeScale, 0.01f, 1f);
+            if (_freezeCo != null) StopCoroutine(_freezeCo);
+            _freezeCo = StartCoroutine(CoFreeze(def));
+        }
+
+        IEnumerator CoFreeze(PowerupDef def)
+        {
+            float dur  = Mathf.Max(0.1f, def.duration);
+            float gMul = Mathf.Clamp(def.freezeGravityScale, 0.01f, 1f);
 
             if (!_origGravityCaptured) { _origGravity2D = Physics2D.gravity; _origGravityCaptured = true; }
 
-            // Begin slow fall
-            FreezeActive = true;
-            var defStart = ScriptableObject.CreateInstance<PowerupDef>(); defStart.kind = PowerupKind.TimeScale;
-            GameEvents.RaisePowerupStarted(defStart);
+            FreezeActive   = true;
+            FreezeSpeedMul = gMul;
+            GameEvents.RaisePowerupStarted(def);
+            AudioManager.Instance?.PlayPowerupStart(def.kind);   // << SFX per-kind
 
-            // Apply gravity scaling (affects dynamic bodies like fruits; kinematic player is unaffected)
             Physics2D.gravity = _origGravity2D * gMul;
+            if (verboseLogs) Debug.Log($"[Freeze] x{gMul:0.##} for {dur:0.##}s");
 
-            if (verboseLogs) Debug.Log($"[Freeze] Gravity scaled to {gMul:0.##}x for {dur:0.##}s");
-
-            // unscaled timer so duration is real seconds regardless of global timeScale
             float t = 0f;
             while (t < dur)
             {
-                if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
-                { yield return null; continue; }
+                if (PauseManager.Instance != null && PauseManager.Instance.IsPaused) { yield return null; continue; }
                 t += Time.unscaledDeltaTime;
                 yield return null;
             }
 
-            // End slow fall
-            RestoreGravityIfNeeded();
-
-            var defEnd = ScriptableObject.CreateInstance<PowerupDef>(); defEnd.kind = PowerupKind.TimeScale;
-            GameEvents.RaisePowerupEnded(defEnd);
-
-            FreezeActive = false;
+            Physics2D.gravity = _origGravity2D;
+            FreezeActive   = false;
+            FreezeSpeedMul = 1f;
+            GameEvents.RaisePowerupEnded(Temp(PowerupKind.TimeScale)); // always correct kind
             _freezeCo = null;
         }
 
-        void RestoreGravityIfNeeded()
-        {
-            if (!_origGravityCaptured) return;
-            Physics2D.gravity = _origGravity2D;
-            if (verboseLogs) Debug.Log("[Freeze] Gravity restored to original.");
-        }
-
-        // ===== Score Multiplier =====
-        void ActivateScoreMultiplier()
+        // ---------- Score Multiplier ----------
+        void StartScoreMultiplier(PowerupDef def)
         {
             if (_multCo != null) StopCoroutine(_multCo);
-            _multCo = StartCoroutine(CoScoreMultiplier());
+            _multCo = StartCoroutine(CoScore(def));
         }
 
-        IEnumerator CoScoreMultiplier()
+        IEnumerator CoScore(PowerupDef def)
         {
-            float dur = Mathf.Max(0.1f, scoreMultDuration);
-
-            var defStart = ScriptableObject.CreateInstance<PowerupDef>();
-            defStart.kind = PowerupKind.ScoreMultiplier;
-            defStart.scoreMultiplier = scoreMultiplier; // FYI for listeners
-            GameEvents.RaisePowerupStarted(defStart);
-
-            // SFX for 2× power-up start
-            AudioHub.I?.PlayScoreMultiplier();
+            float dur = Mathf.Max(0.1f, def.duration);
+            GameEvents.RaisePowerupStarted(def);
+            AudioManager.Instance?.PlayPowerupStart(def.kind);
 
             float t = 0f;
             while (t < dur)
             {
-                if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
-                { yield return null; continue; }
+                if (PauseManager.Instance != null && PauseManager.Instance.IsPaused) { yield return null; continue; }
                 t += Time.unscaledDeltaTime;
                 yield return null;
             }
 
-            var defEnd = ScriptableObject.CreateInstance<PowerupDef>();
-            defEnd.kind = PowerupKind.ScoreMultiplier;
-            GameEvents.RaisePowerupEnded(defEnd);
+            GameEvents.RaisePowerupEnded(Temp(PowerupKind.ScoreMultiplier));
             _multCo = null;
         }
 
-        // ===== Magnet =====
-        void ActivateMagnet()
+        // ---------- Magnet ----------
+        void StartMagnet(PowerupDef def)
         {
             if (_magnetCo != null) StopCoroutine(_magnetCo);
-            _magnetCo = StartCoroutine(CoMagnet());
+            _magnetCo = StartCoroutine(CoMagnet(def));
         }
 
-        IEnumerator CoMagnet()
+        IEnumerator CoMagnet(PowerupDef def)
         {
-            MagnetRadius = Mathf.Max(0.1f, magnetRadius);
-            MagnetPullSpeed = Mathf.Max(0.1f, magnetPullSpeed);
+            MagnetRadius    = Mathf.Max(0.1f, def.magnetRadius);
+            MagnetPullSpeed = Mathf.Max(0.1f, def.magnetPullSpeed);
             PlayerTransform = player ? player : PlayerTransform;
 
-            var defStart = ScriptableObject.CreateInstance<PowerupDef>(); defStart.kind = PowerupKind.Magnet;
-            GameEvents.RaisePowerupStarted(defStart);
+            GameEvents.RaisePowerupStarted(def);
+            AudioManager.Instance?.PlayPowerupStart(def.kind);
 
             MagnetActive = true;
 
-            float dur = Mathf.Max(0.1f, magnetDuration);
+            float dur = Mathf.Max(0.1f, def.duration);
             float t = 0f;
             while (t < dur)
             {
-                if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
-                { yield return null; continue; }
+                if (PauseManager.Instance != null && PauseManager.Instance.IsPaused) { yield return null; continue; }
                 t += Time.unscaledDeltaTime;
                 yield return null;
             }
 
             MagnetActive = false;
-
-            var defEnd = ScriptableObject.CreateInstance<PowerupDef>(); defEnd.kind = PowerupKind.Magnet;
-            GameEvents.RaisePowerupEnded(defEnd);
+            GameEvents.RaisePowerupEnded(Temp(PowerupKind.Magnet));
             _magnetCo = null;
         }
 
-        // ===== Shield =====
-        void ActivateShield()
+        // ---------- Shield ----------
+        void StartShield(PowerupDef def)
         {
             if (_shieldCo != null) StopCoroutine(_shieldCo);
-            _shieldCo = StartCoroutine(CoShield());
+            _shieldCo = StartCoroutine(CoShield(def));
         }
 
-        IEnumerator CoShield()
+        IEnumerator CoShield(PowerupDef def)
         {
-            float dur = Mathf.Max(0f, shieldDuration);
-
             _shieldActive = true;
-            _shieldEndAt = (dur > 0f) ? Time.unscaledTime + dur : 0f;
-            _shieldConsumedByHit = false; // reset on fresh activation
+            _shieldConsumedByHit = false;
 
-            var defStart = ScriptableObject.CreateInstance<PowerupDef>(); defStart.kind = PowerupKind.Shield;
-            GameEvents.RaisePowerupStarted(defStart);
+            float dur = Mathf.Max(0f, def.duration);
+            _shieldEndAt = dur > 0f ? Time.unscaledTime + dur : 0f;
+
+            GameEvents.RaisePowerupStarted(def);
+            AudioManager.Instance?.PlayPowerupStart(def.kind);
 
             if (verboseLogs) Debug.Log(dur > 0f ? $"[Shield] ON for {dur:0.##}s" : "[Shield] ON (until consumed)");
 
-            while (_shieldActive && _shieldEndAt == 0f)
+            while (_shieldActive && _shieldEndAt == 0f) // wait until consumed if infinite
                 yield return null;
 
             _shieldCo = null;
@@ -292,34 +269,28 @@ namespace CatchTheFruit
             _shieldEndAt = 0f;
 
             if (_shieldConsumedByHit)
-            {
-                AudioHub.I?.PlayShieldBreak();
-                if (verboseLogs) Debug.Log("[Shield] Consumed by hit (played break SFX).");
-            }
-            else
-            {
-                if (verboseLogs) Debug.Log("[Shield] Ended by timeout.");
-            }
+                AudioManager.Instance?.PlayShieldBreak();
 
             _shieldConsumedByHit = false;
 
-            var defEnd = ScriptableObject.CreateInstance<PowerupDef>(); defEnd.kind = PowerupKind.Shield;
-            GameEvents.RaisePowerupEnded(defEnd);
+            // IMPORTANT: always raise with a *temp* Shield def so kind is never wrong,
+            // regardless of what asset is in the shieldDef override slot.
+            GameEvents.RaisePowerupEnded(Temp(PowerupKind.Shield));
         }
 
-        // ===== Clear Screen =====
-        void DoClearScreen()
+        // ---------- Clear Screen ----------
+        void DoClear(PowerupDef def)
         {
-            var defStart = ScriptableObject.CreateInstance<PowerupDef>(); defStart.kind = PowerupKind.ClearScreen;
-            GameEvents.RaisePowerupStarted(defStart);
+            GameEvents.RaisePowerupStarted(def);
+            AudioManager.Instance?.PlayPowerupStart(def.kind);
 
             int sum = 0;
             if (Fruit.Active.Count > 0)
             {
-                var list = new List<Fruit>(Fruit.Active);
-                for (int i = 0; i < list.Count; i++)
+                var copy = new List<Fruit>(Fruit.Active);
+                for (int i = 0; i < copy.Count; i++)
                 {
-                    var f = list[i];
+                    var f = copy[i];
                     if (!f) continue;
                     if (f.data != null && !f.data.isBomb) sum += f.data.scoreValue;
                     f.Retire();
@@ -327,10 +298,10 @@ namespace CatchTheFruit
             }
             else
             {
-                var fruits = FindObjectsByType<Fruit>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-                for (int i = 0; i < fruits.Length; i++)
+                var all = Object.FindObjectsByType<Fruit>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+                for (int i = 0; i < all.Length; i++)
                 {
-                    var f = fruits[i];
+                    var f = all[i];
                     if (!f) continue;
                     if (f.data != null && !f.data.isBomb) sum += f.data.scoreValue;
                     f.Retire();
@@ -338,38 +309,40 @@ namespace CatchTheFruit
             }
 
             if (sum > 0) ScoreManager.Instance?.AddBulkPoints(sum);
-
-            var defEnd = ScriptableObject.CreateInstance<PowerupDef>(); defEnd.kind = PowerupKind.ClearScreen;
-            GameEvents.RaisePowerupEnded(defEnd);
+            GameEvents.RaisePowerupEnded(Temp(PowerupKind.ClearScreen));
+            VFXManager.Instance?.PlayClearScreenBurst();
         }
 
-        // ===== Utilities =====
-        void EndAllEffectsImmediate()
+        // ---------- Utilities ----------
+        void EndAllImmediate()
         {
             if (_freezeCo != null) { StopCoroutine(_freezeCo); _freezeCo = null; }
-            if (_multCo != null) { StopCoroutine(_multCo); _multCo = null; }
+            if (_multCo   != null) { StopCoroutine(_multCo);   _multCo = null; }
             if (_magnetCo != null) { StopCoroutine(_magnetCo); _magnetCo = null; }
             if (_shieldCo != null) { StopCoroutine(_shieldCo); _shieldCo = null; }
 
-            // Restore gravity if Freeze active
             if (FreezeActive)
             {
-                RestoreGravityIfNeeded();
-                var def = ScriptableObject.CreateInstance<PowerupDef>(); def.kind = PowerupKind.TimeScale;
-                GameEvents.RaisePowerupEnded(def);
-                FreezeActive = false;
+                Physics2D.gravity = _origGravity2D;
+                FreezeActive   = false;
+                FreezeSpeedMul = 1f;
+                GameEvents.RaisePowerupEnded(Temp(PowerupKind.TimeScale));
             }
 
             MagnetActive = false;
 
             if (_shieldActive)
             {
-                _shieldActive = false;
-                _shieldEndAt = 0f;
-                _shieldConsumedByHit = false;
-                var def = ScriptableObject.CreateInstance<PowerupDef>(); def.kind = PowerupKind.Shield;
-                GameEvents.RaisePowerupEnded(def);
+                _shieldActive = false; _shieldEndAt = 0f; _shieldConsumedByHit = false;
+                GameEvents.RaisePowerupEnded(Temp(PowerupKind.Shield));
             }
+        }
+
+        static PowerupDef Temp(PowerupKind k)
+        {
+            var d = ScriptableObject.CreateInstance<PowerupDef>();
+            d.kind = k;
+            return d;
         }
     }
 }

@@ -1,4 +1,3 @@
-// Assets/_Project/Scripts/Systems/AudioManager.cs
 using UnityEngine;
 
 namespace CatchTheFruit
@@ -14,9 +13,16 @@ namespace CatchTheFruit
         [Header("SFX Clips")]
         public AudioClip sfxCatch;
         public AudioClip sfxBomb;
-        public AudioClip sfxPowerupStart;
-        public AudioClip sfxShieldHit;
+
+        [Space(6)]
+        public AudioClip sfxFreezeStart;
+        public AudioClip sfxScoreStart;
+        public AudioClip sfxMagnetStart;
+        public AudioClip sfxShieldOn;
+        public AudioClip sfxShieldBreak;
         public AudioClip sfxClearBurst;
+
+        [Space(6)]
         public AudioClip sfxUIButton;
 
         [Header("Saved Volumes (0..1)")]
@@ -25,8 +31,8 @@ namespace CatchTheFruit
         [Range(0, 1)] public float sfx = 1f;
 
         const string K_MASTER = "vol_master";
-        const string K_MUSIC = "vol_music";
-        const string K_SFX = "vol_sfx";
+        const string K_MUSIC  = "vol_music";
+        const string K_SFX    = "vol_sfx";
 
         void Awake()
         {
@@ -34,36 +40,34 @@ namespace CatchTheFruit
             Instance = this;
             DontDestroyOnLoad(gameObject);
 
-            // load prefs
             master = PlayerPrefs.GetFloat(K_MASTER, master);
-            music = PlayerPrefs.GetFloat(K_MUSIC, music);
-            sfx = PlayerPrefs.GetFloat(K_SFX, sfx);
+            music  = PlayerPrefs.GetFloat(K_MUSIC,  music);
+            sfx    = PlayerPrefs.GetFloat(K_SFX,    sfx);
             ApplyVolumes();
         }
 
         void OnEnable()
         {
-            GameEvents.OnFruitCaught += OnFruitCaught;
-            GameEvents.OnPowerupStarted += OnPowerupStarted;
-            GameEvents.OnPowerupEnded += OnPowerupEnded; // reserved if you want end SFX later
-            GameEvents.OnGameStart += OnGameStart;    // optional: start BGM
-            GameEvents.OnGameOver += OnGameOver;     // optional: stop/transition BGM
+            GameEvents.OnFruitCaught     += OnFruitCaught;
+            GameEvents.OnPowerupStarted  += OnPowerupStarted;
+            GameEvents.OnGameStart       += OnGameStart;
+            GameEvents.OnGameOver        += OnGameOver;
         }
         void OnDisable()
         {
-            GameEvents.OnFruitCaught -= OnFruitCaught;
-            GameEvents.OnPowerupStarted -= OnPowerupStarted;
-            GameEvents.OnPowerupEnded -= OnPowerupEnded;
-            GameEvents.OnGameStart -= OnGameStart;
-            GameEvents.OnGameOver -= OnGameOver;
+            GameEvents.OnFruitCaught     -= OnFruitCaught;
+            GameEvents.OnPowerupStarted  -= OnPowerupStarted;
+            GameEvents.OnGameStart       -= OnGameStart;
+            GameEvents.OnGameOver        -= OnGameOver;
         }
 
-        // ------------ Public API ------------
+        // ------- Public helpers -------
         public void PlaySFX(AudioClip clip, float vol = 1f)
         {
             if (!clip || !sfxSource) return;
             sfxSource.PlayOneShot(clip, vol * master * sfx);
         }
+        public void PlayUIButtonClick() => PlaySFX(sfxUIButton, 0.9f);
 
         public void PlayMusic(AudioClip clip, bool loop = true)
         {
@@ -74,46 +78,48 @@ namespace CatchTheFruit
             musicSource.volume = master * music;
             musicSource.Play();
         }
-
         public void StopMusic() { if (musicSource) musicSource.Stop(); }
 
-        // UI hooks for sliders
         public void SetMaster(float v) { master = Mathf.Clamp01(v); Save(); ApplyVolumes(); }
-        public void SetMusic(float v) { music = Mathf.Clamp01(v); Save(); ApplyVolumes(); }
-        public void SetSFX(float v) { sfx = Mathf.Clamp01(v); Save(); ApplyVolumes(); }
+        public void SetMusic (float v) { music  = Mathf.Clamp01(v); Save(); ApplyVolumes(); }
+        public void SetSFX   (float v) { sfx    = Mathf.Clamp01(v); Save(); ApplyVolumes(); }
 
         void Save()
         {
             PlayerPrefs.SetFloat(K_MASTER, master);
-            PlayerPrefs.SetFloat(K_MUSIC, music);
-            PlayerPrefs.SetFloat(K_SFX, sfx);
+            PlayerPrefs.SetFloat(K_MUSIC,  music);
+            PlayerPrefs.SetFloat(K_SFX,    sfx);
         }
-
         void ApplyVolumes()
         {
             if (musicSource) musicSource.volume = master * music;
-            // sfxSource volume not used for PlayOneShot mix; we apply per call
+            // sfxSource uses PlayOneShot mixing, volume applied per call
         }
 
-        // ------------ Event handlers ------------
+        // ------- Event handlers -------
         void OnFruitCaught(string id, int score, bool isBomb)
         {
             PlaySFX(isBomb ? sfxBomb : sfxCatch);
         }
 
-        void OnPowerupStarted(PowerupDef def)
+        // Called by PowerupManager at Start events
+        public void PlayPowerupStart(PowerupDef.PowerupKind kind)
         {
-            if (def == null) return;
-            // Play distinct SFX if you want by def.kind, else generic:
-            PlaySFX(sfxPowerupStart);
+            switch (kind)
+            {
+                case PowerupDef.PowerupKind.TimeScale:       PlaySFX(sfxFreezeStart); break;
+                case PowerupDef.PowerupKind.ScoreMultiplier: PlaySFX(sfxScoreStart);  break;
+                case PowerupDef.PowerupKind.Magnet:          PlaySFX(sfxMagnetStart); break;
+                case PowerupDef.PowerupKind.Shield:          PlaySFX(sfxShieldOn);    break;
+                case PowerupDef.PowerupKind.ClearScreen:     PlaySFX(sfxClearBurst);  break;
+            }
         }
 
-        void OnPowerupEnded(PowerupDef def) { /* optional end sound */ }
+        // Called by PowerupManager when shield is consumed by a hit
+        public void PlayShieldBreak() => PlaySFX(sfxShieldBreak);
 
-        void OnGameStart() { /* optionally start music here */ }
-        void OnGameOver() { /* optionally stop/transition music here */ }
-
-        // Convenience for UI buttons
-        public void PlayUIButtonClick() => PlaySFX(sfxUIButton, 0.9f);
+        void OnPowerupStarted(PowerupDef def) { /* handled via PlayPowerupStart(kind) */ }
+        void OnGameStart() { /* optional music start */ }
+        void OnGameOver()  { /* optional music stop */ }
     }
 }

@@ -12,15 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bf4a18734c60cf458ecbe64896c4af8, type: 3}
   m_Name: PU_ScoreX2
   m_EditorClassIdentifier: 
-  id: PU_ScoreX2
   kind: 1
-  overlapPolicy: 0
   duration: 4
-  icon: {fileID: -1643791116833079571, guid: accb679a8a3d6af4a80383a8c6c7a2ae, type: 3}
-  overlayColor: {r: 0.5, g: 0.8, b: 1, a: 1}
-  overlayAlpha: 0.35
-  overlayFade: 0.15
-  timeScale: 0.2
   scoreMultiplier: 2
-  magnetRadius: 3
-  magnetPullSpeed: 7
+  freezeGravityScale: 0
+  magnetRadius: 0
+  magnetPullSpeed: 0

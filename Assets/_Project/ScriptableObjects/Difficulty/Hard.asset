@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Hard
   m_EditorClassIdentifier: 
   displayName: Hard
-  gravityScale: 2.2
-  maxFallSpeed: 11
+  gravityScale: 1.7
+  maxFallSpeed: 9
   initialDownBoost: 0.8
-  spawnIntervalMul: 0.85
-  speedMultiplier: 1.1
+  spawnIntervalMul: 0.984
+  speedMultiplier: 1.064

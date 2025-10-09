@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Easy
   m_EditorClassIdentifier: 
   displayName: Easy
-  gravityScale: 1.6
-  maxFallSpeed: 7.5
+  gravityScale: 1
+  maxFallSpeed: 6
   initialDownBoost: 0
   spawnIntervalMul: 1.25
   speedMultiplier: 0.85

@@ -12,15 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bf4a18734c60cf458ecbe64896c4af8, type: 3}
   m_Name: PU_Magnet
   m_EditorClassIdentifier: 
-  id: PU_Magnet
-  kind: 3
-  overlapPolicy: 0
-  duration: 5
-  icon: {fileID: 3262329568628267361, guid: 9aecfe04f7439b64daf4fe8a865e195a, type: 3}
-  overlayColor: {r: 0.5, g: 0.8, b: 1, a: 1}
-  overlayAlpha: 0.35
-  overlayFade: 0.15
-  timeScale: 0.2
-  scoreMultiplier: 2
+  kind: 2
+  duration: 4
+  scoreMultiplier: 1
+  freezeGravityScale: 0
   magnetRadius: 3
   magnetPullSpeed: 7

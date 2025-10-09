@@ -1,43 +1,45 @@
-﻿// Assets/_Project/Scripts/Gameplay/FruitSpawner.cs
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using URandom = UnityEngine.Random;
 
 namespace CatchTheFruit
 {
-    /// <summary>
-    /// Spawns Fruit using a SpawnTable with internal object pooling.
-    /// - Spawn pacing: currentInterval decays toward minInterval, then divided by SpawnRateRamp()
-    ///   and randomized slightly to keep it organic.
-    /// - Fall speed: SpawnTable.fallSpeedMultiplier × global × Difficulty × FallSpeedRamp() × wave.
-    /// - Safety: hardMinInterval, maxAlive/hardMaxAlive, crowd governor.
-    /// </summary>
     public class FruitSpawner : MonoBehaviour
     {
         public static FruitSpawner Instance { get; private set; }
 
         [Header("Required")]
-        [SerializeField] private GameConfig config;       // arena bounds/spawn/ground
-        [SerializeField] private SpawnTable spawnTable;   // weighted fruit list + base pacing
-        [SerializeField] private Fruit fruitPrefab;       // pooled prefab
+        [SerializeField] private GameConfig config;
+        [SerializeField] private SpawnTable spawnTable;
+        [SerializeField] private Fruit fruitPrefab;
 
         [Header("Pooling")]
         [Min(0)] public int prewarmCount = 24;
-        [SerializeField] private Transform poolRoot; // optional
+        [SerializeField] private Transform poolRoot;
 
         [Header("Baseline Tuning")]
         [Tooltip("Global multiplier applied to ALL fruits’ fall speeds.")]
         [Min(0.25f)] public float globalFallSpeed = 1.6f;
 
-        [Tooltip("Soft limit: if reached, we temporarily slow spawns.")]
-        [Min(1)] public int maxAlive = 18;
+        // PATCH: enums cannot have [Header] attributes — move the header to the field below.
+        public enum AliveCapPreset { Manual, EasyOrMedium, Hard }  // PATCH
 
-        [Header("Hard Safety Caps")]
-        [Tooltip("Absolute minimum interval regardless of difficulty/time/waves.")]
-        [Min(0.05f)] public float hardMinInterval = 0.22f;
+        [Header("Alive Cap Preset")]                                // PATCH (moved here)
+        [Tooltip("Choose a preset cap (14 or 16) or Manual to use the 'Manual Max Alive' value.")]
+        public AliveCapPreset capPreset = AliveCapPreset.EasyOrMedium;
 
-        [Tooltip("Absolute maximum fruits alive (no spawns beyond this).")]
-        [Min(1)] public int hardMaxAlive = 26;
+        [Tooltip("Used only when Preset = Manual.")]
+        [Min(1)] public int manualMaxAlive = 18;
+
+        [Tooltip("Cap for Easy/Medium.")]
+        [Min(1)] public int easyMedCap = 14;
+
+        [Tooltip("Cap for Hard.")]
+        [Min(1)] public int hardCap = 16;
+
+        [Header("Effective Caps (runtime)")]
+        [SerializeField, Min(1)] private int maxAlive = 14;     // soft cap (we simply don't spawn beyond this)
+        [SerializeField, Min(1)] private int hardMaxAlive = 14; // hard cap==soft cap to avoid mid-run deletions
 
         [Header("Adaptive Crowd Governor")]
         [Tooltip("When alive >= this, slow the next spawn cycle a bit.")]
@@ -50,14 +52,17 @@ namespace CatchTheFruit
         [Tooltip("Clamp total fall-speed multiplier (difficulty × time × wave × global).")]
         [Min(1f)] public float maxSpeedMulCap = 2.35f;
 
+        [Header("Spawn Pacing Floors")]
+        [Tooltip("Absolute minimum interval regardless of difficulty/time/waves.")]
+        [Min(0.05f)] public float hardMinInterval = 0.22f;
+
         [Header("Debug")]
         [SerializeField] private bool verboseLogs = false;
 
         // ---------- runtime ----------
         float _interval;              // decays toward _minInterval (scaled by decay)
-        float _minInterval;           // floor per run (from Difficulty)
+        float _minInterval;           // floor per run (from Difficulty/SpawnTable)
         float _decay = 1f;            // per-spawn multiplier toward min (from Difficulty)
-
         bool _running;
 
         float _difficultySpeedMul = 1f;  // from Difficulty at start
@@ -70,6 +75,38 @@ namespace CatchTheFruit
 
         /// <summary>Called by WaveDirector to speed things up over time (multiplies fall speed only).</summary>
         public void SetSpeedMultiplier(float waveMul) => _waveSpeedMul = Mathf.Max(0.5f, waveMul);
+
+        /// <summary>Set the alive cap preset at runtime (e.g., from your DifficultyManager).</summary>
+        public void ApplyCapPreset(bool hard)
+        {
+            capPreset = hard ? AliveCapPreset.Hard : AliveCapPreset.EasyOrMedium;
+            ApplyAliveCaps();
+        }
+
+        void ApplyAliveCaps()
+        {
+            switch (capPreset)
+            {
+                case AliveCapPreset.EasyOrMedium:
+                    maxAlive = Mathf.Max(1, easyMedCap);
+                    break;
+                case AliveCapPreset.Hard:
+                    maxAlive = Mathf.Max(1, hardCap);
+                    break;
+                case AliveCapPreset.Manual:
+                default:
+                    maxAlive = Mathf.Max(1, manualMaxAlive);
+                    break;
+            }
+
+            // Keep hard cap equal to soft cap to avoid mid-run deletions
+            hardMaxAlive = maxAlive;
+
+            // Keep crowd governor sensible relative to cap
+            crowdThreshold = Mathf.Clamp(crowdThreshold, 1, Mathf.Max(1, maxAlive - 2));
+
+            if (verboseLogs) Debug.Log($"[Spawner] Alive cap set → {maxAlive} (preset={capPreset})");
+        }
 
         // ---------- Lifecycle ----------
         void Awake()
@@ -105,7 +142,8 @@ namespace CatchTheFruit
             if (!config)     Debug.LogWarning("[Spawner] Missing GameConfig reference.", this);
             if (!spawnTable) Debug.LogWarning("[Spawner] Missing SpawnTable reference.", this);
             if (!fruitPrefab)Debug.LogWarning("[Spawner] Missing Fruit prefab reference.", this);
-            if (hardMaxAlive < maxAlive) hardMaxAlive = maxAlive;
+
+            ApplyAliveCaps(); // keep caps coherent in Editor
         }
 
         // ---------- Pool ----------
@@ -147,6 +185,9 @@ namespace CatchTheFruit
                 return;
             }
 
+            // Lock in alive caps for this run
+            ApplyAliveCaps();
+
             // Pull pacing from Difficulty (with sensible fallbacks)
             float initialInterval = spawnTable.initialInterval;
             _minInterval = spawnTable.minInterval;
@@ -162,7 +203,6 @@ namespace CatchTheFruit
                 _difficultySpeedMul = Mathf.Max(0.25f, d.fallSpeedMultiplier);
             }
 
-            // Always respect absolute floor
             _minInterval = Mathf.Max(hardMinInterval, _minInterval);
 
             // Reset world & timers
@@ -175,7 +215,7 @@ namespace CatchTheFruit
             if (verboseLogs)
             {
                 Debug.Log($"[Spawner] Start: interval={_interval:0.00}s → min={_minInterval:0.00}s, " +
-                          $"decay={_decay:0.000}, fallMul(difficulty)={_difficultySpeedMul:0.##}, cap={maxSpeedMulCap:0.##}");
+                          $"decay={_decay:0.000}, fallMul(difficulty)={_difficultySpeedMul:0.##}, cap={maxAlive}");
             }
 
             _running = true;
@@ -196,34 +236,27 @@ namespace CatchTheFruit
         {
             while (_running)
             {
-                // Respect hard cap before spawning
                 int alive = Fruit.Active.Count;
-                if (alive < Mathf.Min(maxAlive, hardMaxAlive))
+
+                // Never spawn beyond alive cap
+                if (alive < maxAlive)
                 {
                     SpawnOne();
                     alive = Fruit.Active.Count;
                 }
 
-                // Effective wait time:
-                // - Smaller over time by SpawnRateRamp()
-                // - Randomized slightly to feel organic
-                // - Breathed by crowd governor when too many are alive
+                // Effective wait time
                 float ramp = Mathf.Max(1f, DifficultyManager.SpawnRateRamp());
                 float baseWait = Mathf.Max(_minInterval, _interval) / ramp;
 
-                // A touch of randomness keeps cadence from becoming robotic
                 float randomized = baseWait * URandom.Range(0.88f, 1.12f);
-
-                // Crowd governor adds breathing room when the board is busy
                 if (alive >= crowdThreshold)
                     randomized = Mathf.Max(randomized, (_minInterval / ramp) * crowdIntervalBoost);
 
-                // Hard floor
                 float wait = Mathf.Max(randomized, hardMinInterval);
-
                 yield return new WaitForSeconds(wait);
 
-                // Decay interval toward its floor for the next cycle
+                // Decay toward floor
                 _interval = Mathf.Max(_minInterval, _interval * _decay);
             }
         }
@@ -234,13 +267,15 @@ namespace CatchTheFruit
             var fd = spawnTable ? spawnTable.Pick() : null;
             if (!fd) return;
 
+            // Final guard in case something else spawned meanwhile
+            if (Fruit.Active.Count >= maxAlive) return;
+
             float halfWidth = ComputeHalfWidth();
             float x = URandom.Range(-halfWidth, halfWidth);
             float y = config.spawnY;
 
             var f = GetFromPool(new Vector3(x, y, 0f), Quaternion.identity);
 
-            // Final fall speed multiplier (clamped)
             float timeRamp  = Mathf.Max(1f, DifficultyManager.FallSpeedRamp());
             float mul = spawnTable.fallSpeedMultiplier
                         * globalFallSpeed
@@ -249,11 +284,10 @@ namespace CatchTheFruit
                         * timeRamp;
 
             mul = Mathf.Min(mul, maxSpeedMulCap);
-
             f.Init(fd, mul, config.groundY);
 
             if (verboseLogs)
-                Debug.Log($"[Spawner] + {fd.id} @x={x:0.00}, fallMul={mul:0.##}, alive={Fruit.Active.Count}");
+                Debug.Log($"[Spawner] + {fd.id} @x={x:0.00}, fallMul={mul:0.##}, alive={Fruit.Active.Count}/{maxAlive}");
         }
 
         float ComputeHalfWidth()

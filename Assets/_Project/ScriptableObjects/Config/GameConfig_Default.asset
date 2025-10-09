@@ -19,4 +19,4 @@ MonoBehaviour:
   playerMoveSpeed: 10
   useSessionTimer: 1
   sessionDuration: 60
-  verboseLogs: 1
+  verboseLogs: 0

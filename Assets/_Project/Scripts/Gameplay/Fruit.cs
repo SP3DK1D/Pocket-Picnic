@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿// Assets/_Project/Scripts/Gameplay/Fruit.cs
+using UnityEngine;
 using System.Collections.Generic;
 using URandom = UnityEngine.Random;
 
@@ -67,13 +68,21 @@ namespace CatchTheFruit
                 float w = _sr.sprite.bounds.size.x;
                 if (w > 0.0001f) transform.localScale = Vector3.one * (targetW / w);
             }
+            else
+            {
+                // PATCH: safe default scale when no sprite is set (prevents odd sizes)
+                transform.localScale = Vector3.one; // PATCH
+            }
 
             name = fd ? $"Fruit_{fd.id}" : "Fruit";
         }
 
         void Update()
         {
-            transform.position += Vector3.down * fallSpeed * Time.deltaTime;
+            // PATCH: Apply global freeze multiplier so Freeze always slows enough
+            float freezeMul = PowerupManager.FreezeSpeedMul; // 1 when not freezing  // PATCH
+            transform.position += Vector3.down * (fallSpeed * freezeMul) * Time.deltaTime; // PATCH
+
             transform.Rotate(0f, 0f, _tumbleDir * _tumbleSpeed * Time.deltaTime);
 
             // Magnet homing (non-bombs only)
