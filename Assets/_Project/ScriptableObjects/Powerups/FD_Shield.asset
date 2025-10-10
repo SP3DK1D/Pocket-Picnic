@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FD_Shield
   m_EditorClassIdentifier: 
   id: Shield
-  sprite: {fileID: 3138550945092001932, guid: 62ce727eadf0b1d48b5cc677ee633856, type: 3}
+  sprite: {fileID: 8797133517095488196, guid: fc765c874dc90da43ac3acbd13701596, type: 3}
   tint: {r: 1, g: 1, b: 1, a: 1}
   scoreValue: 1
   minFallSpeed: 2

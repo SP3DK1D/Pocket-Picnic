@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FD_Magnet
   m_EditorClassIdentifier: 
   id: Magnet
-  sprite: {fileID: 3262329568628267361, guid: 9aecfe04f7439b64daf4fe8a865e195a, type: 3}
+  sprite: {fileID: 577160233733615715, guid: 54c122c681c907343b6f664502448f88, type: 3}
   tint: {r: 1, g: 1, b: 1, a: 1}
   scoreValue: 1
   minFallSpeed: 2

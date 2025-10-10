@@ -42,8 +42,7 @@ namespace CatchTheFruit
         static float _startTime;
 
         // --- Progressive ramp parameters ---
-        // How many minutes until we’re fully ramped (scaled difficulty).
-        const float MINUTES_TO_MAX = 1.5f; 
+        const float MINUTES_TO_MAX = 1.5f;
 
         // Cap multipliers so game doesn’t become impossible.
         const float MAX_SPAWN_RATE_MUL = 1.8f;
@@ -56,43 +55,33 @@ namespace CatchTheFruit
             _startTime = Time.time;
         }
 
-        public static void ClearCurrent()
-        {
-            Current = null;
-        }
+        public static void ClearCurrent() => Current = null;
 
         public static float ElapsedMinutes => (Time.time - _startTime) / 60f;
-
-        // === Progressive scaling helpers ===
         static float Progress01 => Mathf.Clamp01(ElapsedMinutes / MINUTES_TO_MAX);
 
-        /// <summary>
-        /// Returns spawn interval multiplier that shrinks as time passes.
-        /// </summary>
+        /// <summary>Spawn interval multiplier that shrinks as time passes (faster spawns over time).</summary>
         public static float SpawnRateRamp()
         {
-            // At t=0 → 1.0. At full ramp → up to MAX_SPAWN_RATE_MUL faster.
-            float mul = Mathf.Lerp(1f, MAX_SPAWN_RATE_MUL, Progress01);
-            return mul;
+            // t=0 → 1.0. Full ramp → up to MAX_SPAWN_RATE_MUL faster.
+            return Mathf.Lerp(1f, MAX_SPAWN_RATE_MUL, Progress01);
         }
 
-        /// <summary>
-        /// Returns fall speed multiplier that rises over time.
-        /// </summary>
+        /// <summary>Fall speed multiplier that rises over time.</summary>
         public static float FallSpeedRamp()
         {
-            float mul = Mathf.Lerp(1f, MAX_FALL_SPEED_MUL, Progress01);
-            return mul;
+            return Mathf.Lerp(1f, MAX_FALL_SPEED_MUL, Progress01);
         }
 
         // === Presets ===
         public static void PickEasy()
         {
+            // ↓ 30% difficulty speed multiplier (was 1.05f → 0.735f)
             Apply(new DifficultySettings(
                 initialInterval: 1.00f,
                 minInterval: 0.42f,
                 intervalDecay: 0.982f,
-                fallSpeedMultiplier: 1.05f,
+                fallSpeedMultiplier: 0.735f,
                 gravityScale: 1.7f,
                 maxFallSpeed: 11.0f,
                 initialDownBoost: 1.4f
@@ -101,11 +90,12 @@ namespace CatchTheFruit
 
         public static void PickMedium()
         {
+            // ↓ 30% difficulty speed multiplier (was 1.20f → 0.84f)
             Apply(new DifficultySettings(
                 initialInterval: 0.85f,
                 minInterval: 0.30f,
                 intervalDecay: 0.978f,
-                fallSpeedMultiplier: 1.20f,
+                fallSpeedMultiplier: 0.84f,
                 gravityScale: 1.9f,
                 maxFallSpeed: 12.5f,
                 initialDownBoost: 1.7f
@@ -114,9 +104,11 @@ namespace CatchTheFruit
 
         public static void PickHard()
         {
+            // ~40% fewer spawns by stretching intervals 1.4× (0.70→0.98, 0.22→0.308).
+            // Other difficulty aspects unchanged.
             Apply(new DifficultySettings(
-                initialInterval: 0.70f,
-                minInterval: 0.22f,
+                initialInterval: 0.98f,   // was 0.70f
+                minInterval: 0.308f,      // was 0.22f
                 intervalDecay: 0.975f,
                 fallSpeedMultiplier: 1.35f,
                 gravityScale: 2.1f,

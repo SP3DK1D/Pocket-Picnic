@@ -1,5 +1,4 @@
-﻿// Assets/_Project/Scripts/Gameplay/Fruit.cs
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 using URandom = UnityEngine.Random;
 
@@ -16,7 +15,13 @@ namespace CatchTheFruit
         public float fallSpeed;
         public bool decorative;
 
+        // Fallback world Y from spawner/config if no camera detected
         float _groundY;
+
+        // Camera-based despawn control
+        [Header("Despawn (below view)")]
+        [Tooltip("Extra world units below the bottom of the camera view before this fruit is culled.")]
+        [Min(0f)][SerializeField] float despawnBelowMargin = 0.75f;
 
         // tumble
         float _tumbleSpeed;  // deg/sec
@@ -40,7 +45,7 @@ namespace CatchTheFruit
         public void Init(FruitData fd, float speedMultiplier, float groundY, bool decorative)
         {
             data = fd;
-            _groundY = groundY;
+            _groundY = groundY;          // fallback only (camera preferred)
             this.decorative = decorative;
 
             if (!_sr) _sr = GetComponent<SpriteRenderer>();
@@ -70,8 +75,7 @@ namespace CatchTheFruit
             }
             else
             {
-                // PATCH: safe default scale when no sprite is set (prevents odd sizes)
-                transform.localScale = Vector3.one; // PATCH
+                transform.localScale = Vector3.one;
             }
 
             name = fd ? $"Fruit_{fd.id}" : "Fruit";
@@ -79,9 +83,9 @@ namespace CatchTheFruit
 
         void Update()
         {
-            // PATCH: Apply global freeze multiplier so Freeze always slows enough
-            float freezeMul = PowerupManager.FreezeSpeedMul; // 1 when not freezing  // PATCH
-            transform.position += Vector3.down * (fallSpeed * freezeMul) * Time.deltaTime; // PATCH
+            // Apply global freeze multiplier so Freeze always slows enough
+            float freezeMul = PowerupManager.FreezeSpeedMul; // 1 when not freezing
+            transform.position += Vector3.down * (fallSpeed * freezeMul) * Time.deltaTime;
 
             transform.Rotate(0f, 0f, _tumbleDir * _tumbleSpeed * Time.deltaTime);
 
@@ -106,13 +110,30 @@ namespace CatchTheFruit
 
         void LateUpdate()
         {
-            if (!decorative && transform.position.y <= _groundY)
+            if (decorative) return;
+
+            // Compute kill Y from the active camera's bottom edge, with a small margin below view.
+            float killY = ComputeKillY();
+
+            if (transform.position.y <= killY)
             {
                 bool isPowerup = (data != null && data.powerup != null);
                 bool isBomb = (data != null && data.isBomb);
                 GameEvents.RaiseFruitMissed(data?.id ?? "?", isBomb, isPowerup);
                 Retire();
             }
+        }
+
+        float ComputeKillY()
+        {
+            var cam = Camera.main;
+            if (cam && cam.orthographic)
+            {
+                float bottom = cam.transform.position.y - cam.orthographicSize;
+                return bottom - Mathf.Abs(despawnBelowMargin);
+            }
+            // Fallback to legacy groundY (e.g., if camera not found)
+            return _groundY;
         }
 
         // ----- Catch entry points (called by BasketCatchZone) -----

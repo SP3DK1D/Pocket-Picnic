@@ -15,6 +15,6 @@ MonoBehaviour:
   kind: 0
   duration: 3
   scoreMultiplier: 1
-  freezeGravityScale: 0.5
+  freezeGravityScale: 0.35
   magnetRadius: 0
   magnetPullSpeed: 0

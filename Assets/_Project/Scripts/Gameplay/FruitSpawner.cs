@@ -21,10 +21,9 @@ namespace CatchTheFruit
         [Tooltip("Global multiplier applied to ALL fruits’ fall speeds.")]
         [Min(0.25f)] public float globalFallSpeed = 1.6f;
 
-        // PATCH: enums cannot have [Header] attributes — move the header to the field below.
-        public enum AliveCapPreset { Manual, EasyOrMedium, Hard }  // PATCH
+        public enum AliveCapPreset { Manual, EasyOrMedium, Hard }
 
-        [Header("Alive Cap Preset")]                                // PATCH (moved here)
+        [Header("Alive Cap Preset")]
         [Tooltip("Choose a preset cap (14 or 16) or Manual to use the 'Manual Max Alive' value.")]
         public AliveCapPreset capPreset = AliveCapPreset.EasyOrMedium;
 
@@ -38,8 +37,8 @@ namespace CatchTheFruit
         [Min(1)] public int hardCap = 16;
 
         [Header("Effective Caps (runtime)")]
-        [SerializeField, Min(1)] private int maxAlive = 14;     // soft cap (we simply don't spawn beyond this)
-        [SerializeField, Min(1)] private int hardMaxAlive = 14; // hard cap==soft cap to avoid mid-run deletions
+        [SerializeField, Min(1)] private int maxAlive = 14;     // soft cap
+        [SerializeField, Min(1)] private int hardMaxAlive = 14; // kept equal to soft cap
 
         [Header("Adaptive Crowd Governor")]
         [Tooltip("When alive >= this, slow the next spawn cycle a bit.")]
@@ -54,7 +53,11 @@ namespace CatchTheFruit
 
         [Header("Spawn Pacing Floors")]
         [Tooltip("Absolute minimum interval regardless of difficulty/time/waves.")]
-        [Min(0.05f)] public float hardMinInterval = 0.22f;
+        [Min(0.05f)] public float hardMinInterval = 0.28f; // ↑ a bit from 0.22 to curb bursts
+
+        [Header("Anti-Burst")]
+        [Tooltip("Guarantee at least this many seconds between spawns, across all modes.")]
+        [Min(0.05f)] public float noBurstMinGap = 0.28f;
 
         [Header("Debug")]
         [SerializeField] private bool verboseLogs = false;
@@ -66,7 +69,7 @@ namespace CatchTheFruit
         bool _running;
 
         float _difficultySpeedMul = 1f;  // from Difficulty at start
-        float _waveSpeedMul       = 1f;  // set by WaveDirector during run
+        float _waveSpeedMul = 1f;  // set by WaveDirector during run
 
         readonly Queue<Fruit> _pool = new();
 
@@ -87,22 +90,13 @@ namespace CatchTheFruit
         {
             switch (capPreset)
             {
-                case AliveCapPreset.EasyOrMedium:
-                    maxAlive = Mathf.Max(1, easyMedCap);
-                    break;
-                case AliveCapPreset.Hard:
-                    maxAlive = Mathf.Max(1, hardCap);
-                    break;
+                case AliveCapPreset.EasyOrMedium: maxAlive = Mathf.Max(1, easyMedCap); break;
+                case AliveCapPreset.Hard: maxAlive = Mathf.Max(1, hardCap); break;
                 case AliveCapPreset.Manual:
-                default:
-                    maxAlive = Mathf.Max(1, manualMaxAlive);
-                    break;
+                default: maxAlive = Mathf.Max(1, manualMaxAlive); break;
             }
 
-            // Keep hard cap equal to soft cap to avoid mid-run deletions
             hardMaxAlive = maxAlive;
-
-            // Keep crowd governor sensible relative to cap
             crowdThreshold = Mathf.Clamp(crowdThreshold, 1, Mathf.Max(1, maxAlive - 2));
 
             if (verboseLogs) Debug.Log($"[Spawner] Alive cap set → {maxAlive} (preset={capPreset})");
@@ -126,24 +120,23 @@ namespace CatchTheFruit
         void OnEnable()
         {
             GameEvents.OnGameStart += StartRun;
-            GameEvents.OnGameOver  += StopRun;
+            GameEvents.OnGameOver += StopRun;
         }
 
         void OnDisable()
         {
             GameEvents.OnGameStart -= StartRun;
-            GameEvents.OnGameOver  -= StopRun;
+            GameEvents.OnGameOver -= StopRun;
             _running = false;
             StopAllCoroutines();
         }
 
         void OnValidate()
         {
-            if (!config)     Debug.LogWarning("[Spawner] Missing GameConfig reference.", this);
+            if (!config) Debug.LogWarning("[Spawner] Missing GameConfig reference.", this);
             if (!spawnTable) Debug.LogWarning("[Spawner] Missing SpawnTable reference.", this);
-            if (!fruitPrefab)Debug.LogWarning("[Spawner] Missing Fruit prefab reference.", this);
-
-            ApplyAliveCaps(); // keep caps coherent in Editor
+            if (!fruitPrefab) Debug.LogWarning("[Spawner] Missing Fruit prefab reference.", this);
+            ApplyAliveCaps();
         }
 
         // ---------- Pool ----------
@@ -198,12 +191,14 @@ namespace CatchTheFruit
             {
                 var d = DifficultyManager.Current;
                 initialInterval = Mathf.Max(0.05f, d.initialInterval);
-                _minInterval    = Mathf.Max(0.05f, d.minInterval);
-                _decay          = Mathf.Clamp(d.intervalDecay, 0.5f, 1f);
+                _minInterval = Mathf.Max(0.05f, d.minInterval);
+                _decay = Mathf.Clamp(d.intervalDecay, 0.5f, 1f);
                 _difficultySpeedMul = Mathf.Max(0.25f, d.fallSpeedMultiplier);
             }
 
+            // Global floors (anti-burst)
             _minInterval = Mathf.Max(hardMinInterval, _minInterval);
+            noBurstMinGap = Mathf.Max(noBurstMinGap, hardMinInterval);
 
             // Reset world & timers
             ClearExistingFruits();
@@ -215,7 +210,7 @@ namespace CatchTheFruit
             if (verboseLogs)
             {
                 Debug.Log($"[Spawner] Start: interval={_interval:0.00}s → min={_minInterval:0.00}s, " +
-                          $"decay={_decay:0.000}, fallMul(difficulty)={_difficultySpeedMul:0.##}, cap={maxAlive}");
+                          $"decay={_decay:0.000}, fallMul(difficulty)={_difficultySpeedMul:0.##}, cap={maxAlive}, antiBurst={noBurstMinGap:0.00}s");
             }
 
             _running = true;
@@ -249,11 +244,13 @@ namespace CatchTheFruit
                 float ramp = Mathf.Max(1f, DifficultyManager.SpawnRateRamp());
                 float baseWait = Mathf.Max(_minInterval, _interval) / ramp;
 
-                float randomized = baseWait * URandom.Range(0.88f, 1.12f);
+                // Randomize a bit to avoid sync, then enforce anti-burst floors
+                float randomized = baseWait * URandom.Range(0.90f, 1.12f);
+
                 if (alive >= crowdThreshold)
                     randomized = Mathf.Max(randomized, (_minInterval / ramp) * crowdIntervalBoost);
 
-                float wait = Mathf.Max(randomized, hardMinInterval);
+                float wait = Mathf.Max(randomized, hardMinInterval, noBurstMinGap);
                 yield return new WaitForSeconds(wait);
 
                 // Decay toward floor
@@ -267,7 +264,6 @@ namespace CatchTheFruit
             var fd = spawnTable ? spawnTable.Pick() : null;
             if (!fd) return;
 
-            // Final guard in case something else spawned meanwhile
             if (Fruit.Active.Count >= maxAlive) return;
 
             float halfWidth = ComputeHalfWidth();
@@ -276,7 +272,7 @@ namespace CatchTheFruit
 
             var f = GetFromPool(new Vector3(x, y, 0f), Quaternion.identity);
 
-            float timeRamp  = Mathf.Max(1f, DifficultyManager.FallSpeedRamp());
+            float timeRamp = Mathf.Max(1f, DifficultyManager.FallSpeedRamp());
             float mul = spawnTable.fallSpeedMultiplier
                         * globalFallSpeed
                         * _difficultySpeedMul

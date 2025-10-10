@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: PU_Shield
   m_EditorClassIdentifier: 
   kind: 3
-  duration: 15
+  duration: 25
   scoreMultiplier: 1
   freezeGravityScale: 0
   magnetRadius: 0

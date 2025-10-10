@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FD_Clear
   m_EditorClassIdentifier: 
   id: Clear
-  sprite: {fileID: -3657003424711430175, guid: 7941a134c97bbc84db9bc17be80e8a01, type: 3}
+  sprite: {fileID: 8107126643422311801, guid: ce6bd346755cbad469376e6aa63870fd, type: 3}
   tint: {r: 1, g: 1, b: 1, a: 1}
   scoreValue: 1
   minFallSpeed: 2

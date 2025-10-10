@@ -17,4 +17,4 @@ MonoBehaviour:
   scoreMultiplier: 1
   freezeGravityScale: 0
   magnetRadius: 3
-  magnetPullSpeed: 7
+  magnetPullSpeed: 13

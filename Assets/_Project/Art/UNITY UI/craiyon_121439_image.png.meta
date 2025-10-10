@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 765fd8781f0fdd14ab78c486e93869f4
+guid: ce6bd346755cbad469376e6aa63870fd
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2614083439941808467
-    second: craiyon_231304_image_0
+      213: 8107126643422311801
+    second: craiyon_121439_image_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: craiyon_231304_image_0
+      name: craiyon_121439_image_0
       rect:
         serializedVersion: 2
-        x: 123
-        y: 93
-        width: 778
-        height: 854
+        x: 193
+        y: 250
+        width: 635
+        height: 1090
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 35176f2e907174420800000000000000
-      internalID: 2614083439941808467
+      spriteID: 975ba429abc428070800000000000000
+      internalID: 8107126643422311801
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      craiyon_231304_image_0: 2614083439941808467
+      craiyon_121439_image_0: 8107126643422311801
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
