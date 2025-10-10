@@ -23,6 +23,11 @@ namespace CatchTheFruit
         [Tooltip("Extra world units below the bottom of the camera view before this fruit is culled.")]
         [Min(0f)][SerializeField] float despawnBelowMargin = 0.75f;
 
+        [Tooltip("Fruit must be out of camera view for this long (seconds) before we retire it.")]
+        [Range(0f, 2f)][SerializeField] float offscreenGraceSeconds = 0.40f;
+
+        float _offscreenTimer;
+
         // tumble
         float _tumbleSpeed;  // deg/sec
         int _tumbleDir;      // +1 or -1
@@ -36,7 +41,7 @@ namespace CatchTheFruit
         public bool IsCatchable => !decorative && (!IsBomb);
         public Vector2 Position2D => transform.position;
 
-        void OnEnable() { Active.Add(this); }
+        void OnEnable() { Active.Add(this); _offscreenTimer = 0f; }
         void OnDisable() { Active.Remove(this); }
 
         public void Init(FruitData fd, float speedMultiplier, float groundY) =>
@@ -62,9 +67,11 @@ namespace CatchTheFruit
             float mul = Mathf.Max(0.5f, speedMultiplier);
             fallSpeed = Mathf.Max(3.2f, URandom.Range(min, max) * mul);
 
-            // Random tumble
+            // Random tumble (+40% via DifficultyManager)
             _tumbleDir = (URandom.value < 0.5f) ? -1 : 1;
-            _tumbleSpeed = URandom.Range(35f, 90f);
+            float baseTumble = URandom.Range(35f, 90f);
+            float tumbleMul = Mathf.Max(0f, DifficultyManager.TumbleMultiplier); // default 1.4
+            _tumbleSpeed = baseTumble * (tumbleMul <= 0f ? 1f : tumbleMul);
 
             // Normalize to width ≈ 0.8 world units
             const float targetW = 0.8f;
@@ -79,11 +86,12 @@ namespace CatchTheFruit
             }
 
             name = fd ? $"Fruit_{fd.id}" : "Fruit";
+            _offscreenTimer = 0f;
         }
 
         void Update()
         {
-            // Apply global freeze multiplier so Freeze always slows enough
+            // Apply freeze multiplier so Freeze always slows enough
             float freezeMul = PowerupManager.FreezeSpeedMul; // 1 when not freezing
             transform.position += Vector3.down * (fallSpeed * freezeMul) * Time.deltaTime;
 
@@ -112,10 +120,15 @@ namespace CatchTheFruit
         {
             if (decorative) return;
 
-            // Compute kill Y from the active camera's bottom edge, with a small margin below view.
-            float killY = ComputeKillY();
+            // Compute safe kill Y
+            float killY = ComputeKillYSafe();
 
-            if (transform.position.y <= killY)
+            // Visible? Reset grace timer; otherwise accumulate
+            bool visible = IsVisibleByCamera();
+            _offscreenTimer = visible ? 0f : _offscreenTimer + Time.deltaTime;
+
+            // Only retire if we've fallen past killY AND have been offscreen for the grace time
+            if (transform.position.y <= killY && _offscreenTimer >= offscreenGraceSeconds)
             {
                 bool isPowerup = (data != null && data.powerup != null);
                 bool isBomb = (data != null && data.isBomb);
@@ -124,16 +137,40 @@ namespace CatchTheFruit
             }
         }
 
-        float ComputeKillY()
+        float ComputeKillYSafe()
         {
+            float camBottom = float.NegativeInfinity;
             var cam = Camera.main;
             if (cam && cam.orthographic)
             {
-                float bottom = cam.transform.position.y - cam.orthographicSize;
-                return bottom - Mathf.Abs(despawnBelowMargin);
+                camBottom = cam.transform.position.y - cam.orthographicSize;
+                camBottom -= Mathf.Abs(despawnBelowMargin);
             }
-            // Fallback to legacy groundY (e.g., if camera not found)
-            return _groundY;
+
+            // Fallback to legacy groundY (usually below the camera)
+            float legacy = _groundY;
+
+            // Choose the LOWER of the two so we never cull inside the screen.
+            float killY = Mathf.Min(camBottom, legacy);
+
+            // As a final guard, never set killY above (camera bottom - 0.25f) if camera exists
+            if (cam && cam.orthographic)
+            {
+                float conservative = (cam.transform.position.y - cam.orthographicSize) - 0.25f;
+                killY = Mathf.Min(killY, conservative);
+            }
+            return killY;
+        }
+
+        bool IsVisibleByCamera()
+        {
+            // Cheap visibility test via renderer, falls back to viewport check if needed
+            if (_sr && _sr.isVisible) return true;
+
+            var cam = Camera.main;
+            if (!cam) return true; // assume visible if no camera context
+            Vector3 vp = cam.WorldToViewportPoint(transform.position);
+            return vp.z > 0f && vp.x > -0.05f && vp.x < 1.05f && vp.y > -0.05f && vp.y < 1.05f;
         }
 
         // ----- Catch entry points (called by BasketCatchZone) -----
@@ -176,5 +213,17 @@ namespace CatchTheFruit
             else
                 Destroy(gameObject);
         }
+
+#if UNITY_EDITOR
+        void OnDrawGizmosSelected()
+        {
+            // Visualize the computed kill Y to help tune margins
+            var cam = Camera.main;
+            if (!cam || !cam.orthographic) return;
+            float y = ComputeKillYSafe();
+            Gizmos.color = new Color(1f, 0.2f, 0.2f, 0.6f);
+            Gizmos.DrawLine(new Vector3(-100f, y, 0f), new Vector3(100f, y, 0f));
+        }
+#endif
     }
 }

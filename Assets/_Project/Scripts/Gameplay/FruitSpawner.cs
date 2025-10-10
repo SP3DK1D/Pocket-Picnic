@@ -17,92 +17,32 @@ namespace CatchTheFruit
         [Min(0)] public int prewarmCount = 24;
         [SerializeField] private Transform poolRoot;
 
-        [Header("Baseline Tuning")]
-        [Tooltip("Global multiplier applied to ALL fruits’ fall speeds.")]
-        [Min(0.25f)] public float globalFallSpeed = 1.6f;
+        [Header("Spawn Pacing")]
+        [Tooltip("Base spawn interval at game start (already tuned down ~25%).")]
+        [Min(0.05f)] public float initialInterval = 1.10f;   // was ~0.9
+        [Tooltip("Minimum spawn interval (never faster than this).")]
+        [Min(0.05f)] public float minInterval = 0.44f;       // was ~0.35
+        [Tooltip("Per-spawn decay toward min interval (0.98 = slowly speeds up).")]
+        [Range(0.5f, 1f)] public float intervalDecay = 0.985f;
+        [Tooltip("Extra spacing safety to avoid bursts.")]
+        [Min(0.05f)] public float noBurstMinGap = 0.40f;
 
-        public enum AliveCapPreset { Manual, EasyOrMedium, Hard }
-
-        [Header("Alive Cap Preset")]
-        [Tooltip("Choose a preset cap (14 or 16) or Manual to use the 'Manual Max Alive' value.")]
-        public AliveCapPreset capPreset = AliveCapPreset.EasyOrMedium;
-
-        [Tooltip("Used only when Preset = Manual.")]
-        [Min(1)] public int manualMaxAlive = 18;
-
-        [Tooltip("Cap for Easy/Medium.")]
-        [Min(1)] public int easyMedCap = 14;
-
-        [Tooltip("Cap for Hard.")]
-        [Min(1)] public int hardCap = 16;
-
-        [Header("Effective Caps (runtime)")]
-        [SerializeField, Min(1)] private int maxAlive = 14;     // soft cap
-        [SerializeField, Min(1)] private int hardMaxAlive = 14; // kept equal to soft cap
-
-        [Header("Adaptive Crowd Governor")]
-        [Tooltip("When alive >= this, slow the next spawn cycle a bit.")]
-        [Min(1)] public int crowdThreshold = 12;
-
-        [Tooltip("Multiply the next interval by this when crowded.")]
-        [Range(1f, 2f)] public float crowdIntervalBoost = 1.35f;
-
-        [Header("Speed Ramp Clamp")]
-        [Tooltip("Clamp total fall-speed multiplier (difficulty × time × wave × global).")]
-        [Min(1f)] public float maxSpeedMulCap = 2.35f;
-
-        [Header("Spawn Pacing Floors")]
-        [Tooltip("Absolute minimum interval regardless of difficulty/time/waves.")]
-        [Min(0.05f)] public float hardMinInterval = 0.28f; // ↑ a bit from 0.22 to curb bursts
-
-        [Header("Anti-Burst")]
-        [Tooltip("Guarantee at least this many seconds between spawns, across all modes.")]
-        [Min(0.05f)] public float noBurstMinGap = 0.28f;
+        [Header("Alive Cap")]
+        [Min(1)] public int maxAlive = 14;
 
         [Header("Debug")]
-        [SerializeField] private bool verboseLogs = false;
+        public bool verboseLogs = false;
 
         // ---------- runtime ----------
-        float _interval;              // decays toward _minInterval (scaled by decay)
-        float _minInterval;           // floor per run (from Difficulty/SpawnTable)
-        float _decay = 1f;            // per-spawn multiplier toward min (from Difficulty)
-        bool _running;
-
-        float _difficultySpeedMul = 1f;  // from Difficulty at start
-        float _waveSpeedMul = 1f;  // set by WaveDirector during run
-
         readonly Queue<Fruit> _pool = new();
+        bool _running;
+        float _interval;
 
-        // ---------- External controls ----------
-        public void SetSpawnTable(SpawnTable table) => spawnTable = table;
+        // ===== Legacy public API (kept for compatibility; waves disabled) =====
+        public void SetSpeedMultiplier(float _) { /* waves disabled / ignored */ }
+        public void StopAndClear() => StopRun();
 
-        /// <summary>Called by WaveDirector to speed things up over time (multiplies fall speed only).</summary>
-        public void SetSpeedMultiplier(float waveMul) => _waveSpeedMul = Mathf.Max(0.5f, waveMul);
-
-        /// <summary>Set the alive cap preset at runtime (e.g., from your DifficultyManager).</summary>
-        public void ApplyCapPreset(bool hard)
-        {
-            capPreset = hard ? AliveCapPreset.Hard : AliveCapPreset.EasyOrMedium;
-            ApplyAliveCaps();
-        }
-
-        void ApplyAliveCaps()
-        {
-            switch (capPreset)
-            {
-                case AliveCapPreset.EasyOrMedium: maxAlive = Mathf.Max(1, easyMedCap); break;
-                case AliveCapPreset.Hard: maxAlive = Mathf.Max(1, hardCap); break;
-                case AliveCapPreset.Manual:
-                default: maxAlive = Mathf.Max(1, manualMaxAlive); break;
-            }
-
-            hardMaxAlive = maxAlive;
-            crowdThreshold = Mathf.Clamp(crowdThreshold, 1, Mathf.Max(1, maxAlive - 2));
-
-            if (verboseLogs) Debug.Log($"[Spawner] Alive cap set → {maxAlive} (preset={capPreset})");
-        }
-
-        // ---------- Lifecycle ----------
+        // ---------- LIFECYCLE ----------
         void Awake()
         {
             if (Instance && Instance != this) { Destroy(gameObject); return; }
@@ -122,27 +62,15 @@ namespace CatchTheFruit
             GameEvents.OnGameStart += StartRun;
             GameEvents.OnGameOver += StopRun;
         }
-
         void OnDisable()
         {
             GameEvents.OnGameStart -= StartRun;
             GameEvents.OnGameOver -= StopRun;
-            _running = false;
-            StopAllCoroutines();
         }
 
-        void OnValidate()
-        {
-            if (!config) Debug.LogWarning("[Spawner] Missing GameConfig reference.", this);
-            if (!spawnTable) Debug.LogWarning("[Spawner] Missing SpawnTable reference.", this);
-            if (!fruitPrefab) Debug.LogWarning("[Spawner] Missing Fruit prefab reference.", this);
-            ApplyAliveCaps();
-        }
-
-        // ---------- Pool ----------
         void Prewarm()
         {
-            if (!fruitPrefab) { Debug.LogError("[Spawner] Assign Fruit prefab.", this); return; }
+            if (!fruitPrefab) return;
             for (int i = 0; i < prewarmCount; i++)
             {
                 var f = Instantiate(fruitPrefab, poolRoot);
@@ -151,12 +79,12 @@ namespace CatchTheFruit
             }
         }
 
-        Fruit GetFromPool(Vector3 pos, Quaternion rot)
+        Fruit GetFromPool(Vector3 pos)
         {
             Fruit f = _pool.Count > 0 ? _pool.Dequeue() : Instantiate(fruitPrefab);
             var t = f.transform;
             t.SetParent(null, false);
-            t.SetPositionAndRotation(pos, rot);
+            t.position = pos;
             f.gameObject.SetActive(true);
             return f;
         }
@@ -169,51 +97,19 @@ namespace CatchTheFruit
             _pool.Enqueue(f);
         }
 
-        // ---------- Run control ----------
+        // ---------- RUN ----------
         void StartRun()
         {
-            if (!config || !spawnTable || !fruitPrefab)
-            {
-                Debug.LogWarning("[Spawner] Cannot start: assign Config, SpawnTable, and Fruit prefab.", this);
-                return;
-            }
-
-            // Lock in alive caps for this run
-            ApplyAliveCaps();
-
-            // Pull pacing from Difficulty (with sensible fallbacks)
-            float initialInterval = spawnTable.initialInterval;
-            _minInterval = spawnTable.minInterval;
-            _decay = Mathf.Clamp(spawnTable.intervalDecay, 0.5f, 1f);
-            _difficultySpeedMul = 1f;
-
-            if (DifficultyManager.HasCurrent)
-            {
-                var d = DifficultyManager.Current;
-                initialInterval = Mathf.Max(0.05f, d.initialInterval);
-                _minInterval = Mathf.Max(0.05f, d.minInterval);
-                _decay = Mathf.Clamp(d.intervalDecay, 0.5f, 1f);
-                _difficultySpeedMul = Mathf.Max(0.25f, d.fallSpeedMultiplier);
-            }
-
-            // Global floors (anti-burst)
-            _minInterval = Mathf.Max(hardMinInterval, _minInterval);
-            noBurstMinGap = Mathf.Max(noBurstMinGap, hardMinInterval);
-
-            // Reset world & timers
-            ClearExistingFruits();
-            _waveSpeedMul = 1f;
-
-            // Start a bit “looser” than min
-            _interval = Mathf.Max(_minInterval, initialInterval);
-
-            if (verboseLogs)
-            {
-                Debug.Log($"[Spawner] Start: interval={_interval:0.00}s → min={_minInterval:0.00}s, " +
-                          $"decay={_decay:0.000}, fallMul(difficulty)={_difficultySpeedMul:0.##}, cap={maxAlive}, antiBurst={noBurstMinGap:0.00}s");
-            }
-
+            StopAllCoroutines();
             _running = true;
+
+            // Use SpawnTable pacing if assigned; otherwise local fields
+            _interval = spawnTable ? Mathf.Max(spawnTable.minInterval, spawnTable.initialInterval) : initialInterval;
+            var minFloor = spawnTable ? spawnTable.minInterval : minInterval;
+            minInterval = Mathf.Max(minInterval, minFloor);
+            intervalDecay = spawnTable ? spawnTable.intervalDecay : intervalDecay;
+
+            ClearExistingFruits();
             StartCoroutine(SpawnLoop());
         }
 
@@ -222,68 +118,63 @@ namespace CatchTheFruit
             _running = false;
             StopAllCoroutines();
             ClearExistingFruits();
-            if (verboseLogs) Debug.Log("[Spawner] Stopped and cleared.");
         }
-
-        public void StopAndClear() => StopRun();
 
         System.Collections.IEnumerator SpawnLoop()
         {
+            yield return new WaitForSeconds(0.25f);
+
             while (_running)
             {
-                int alive = Fruit.Active.Count;
+                // ----- Freeze-aware alive cap -----
+                float freezeMul = GetFreezeMul();                   // 1 when normal, <1 when frozen
+                int effectiveMaxAlive = Mathf.Max(
+                    1,
+                    Mathf.FloorToInt(maxAlive * Mathf.Clamp(freezeMul, 0.45f, 1f))
+                );
 
-                // Never spawn beyond alive cap
-                if (alive < maxAlive)
-                {
+                if (Fruit.Active.Count < effectiveMaxAlive)
                     SpawnOne();
-                    alive = Fruit.Active.Count;
-                }
 
-                // Effective wait time
-                float ramp = Mathf.Max(1f, DifficultyManager.SpawnRateRamp());
-                float baseWait = Mathf.Max(_minInterval, _interval) / ramp;
+                // decay toward min
+                _interval = Mathf.Max(minInterval, _interval * intervalDecay);
 
-                // Randomize a bit to avoid sync, then enforce anti-burst floors
-                float randomized = baseWait * URandom.Range(0.90f, 1.12f);
+                // base wait with anti-burst
+                float wait = Mathf.Max(_interval, noBurstMinGap);
 
-                if (alive >= crowdThreshold)
-                    randomized = Mathf.Max(randomized, (_minInterval / ramp) * crowdIntervalBoost);
+                // ----- Freeze-aware spawn slow-down -----
+                // If fruits fall at half speed (freezeMul=0.5), stretch wait ≈ 2x.
+                // Clamp to avoid extreme values if a powerup sets it too low.
+                float freezeScale = 1f / Mathf.Clamp(freezeMul, 0.35f, 1f);
+                wait *= freezeScale;
 
-                float wait = Mathf.Max(randomized, hardMinInterval, noBurstMinGap);
                 yield return new WaitForSeconds(wait);
-
-                // Decay toward floor
-                _interval = Mathf.Max(_minInterval, _interval * _decay);
             }
         }
 
-        // ---------- Spawn ----------
+        // ---------- SPAWN ----------
         void SpawnOne()
         {
             var fd = spawnTable ? spawnTable.Pick() : null;
             if (!fd) return;
 
-            if (Fruit.Active.Count >= maxAlive) return;
-
             float halfWidth = ComputeHalfWidth();
             float x = URandom.Range(-halfWidth, halfWidth);
             float y = config.spawnY;
 
-            var f = GetFromPool(new Vector3(x, y, 0f), Quaternion.identity);
+            var f = GetFromPool(new Vector3(x, y, 0f));
 
-            float timeRamp = Mathf.Max(1f, DifficultyManager.FallSpeedRamp());
-            float mul = spawnTable.fallSpeedMultiplier
-                        * globalFallSpeed
-                        * _difficultySpeedMul
-                        * _waveSpeedMul
-                        * timeRamp;
+            // Absolute target fall speed from Difficulty (base + step ramp + cap)
+            float desiredSpeed = DifficultyManager.CurrentFallSpeed(); // world units/sec
 
-            mul = Mathf.Min(mul, maxSpeedMulCap);
-            f.Init(fd, mul, config.groundY);
+            // Convert absolute target speed to the multiplier Fruit.Init expects
+            float baseline = Mathf.Max(0.01f, (fd.minFallSpeed + fd.maxFallSpeed) * 0.5f);
+            float mul = Mathf.Max(0.2f, desiredSpeed / baseline);
 
             if (verboseLogs)
-                Debug.Log($"[Spawner] + {fd.id} @x={x:0.00}, fallMul={mul:0.##}, alive={Fruit.Active.Count}/{maxAlive}");
+                Debug.Log($"[Spawner] {fd.id} desired={desiredSpeed:0.00} baseline={baseline:0.00} mul={mul:0.00} alive={Fruit.Active.Count}/{maxAlive}");
+
+            f.Init(fd, mul, config.groundY);
         }
 
         float ComputeHalfWidth()
@@ -292,33 +183,35 @@ namespace CatchTheFruit
             float halfWidth = config.arenaHalfWidth;
             if (cam)
             {
-                halfWidth = cam.orthographicSize * cam.aspect - 0.2f; // small edge margin
+                halfWidth = cam.orthographicSize * cam.aspect - 0.2f;
                 halfWidth = Mathf.Max(0.1f, halfWidth);
             }
             return halfWidth;
         }
 
-        // ---------- Clear ----------
         void ClearExistingFruits()
         {
             if (Fruit.Active.Count > 0)
             {
                 var list = new List<Fruit>(Fruit.Active);
                 for (int i = 0; i < list.Count; i++)
-                {
-                    var fruit = list[i];
-                    if (!fruit) continue;
-                    Recycle(fruit);
-                }
-                return;
+                    if (list[i]) Recycle(list[i]);
             }
+        }
 
-            var fruits = FindObjectsByType<Fruit>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-            for (int i = 0; i < fruits.Length; i++)
+        // ----- Helpers -----
+        static float GetFreezeMul()
+        {
+            // Your Fruit.Update already uses PowerupManager.FreezeSpeedMul.
+            // When not freezing this should be exactly 1.
+            // Gracefully handle missing manager by treating as no-freeze.
+            try
             {
-                var fruit = fruits[i];
-                if (!fruit) continue;
-                Recycle(fruit);
+                return Mathf.Clamp01(PowerupManager.FreezeSpeedMul);
+            }
+            catch
+            {
+                return 1f;
             }
         }
     }

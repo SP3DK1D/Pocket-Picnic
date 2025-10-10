@@ -1,13 +1,7 @@
-﻿// Assets/_Project/Scripts/UI/MenuFlowController.cs
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace CatchTheFruit
 {
-    /// <summary>
-    /// Central menu flow controller:
-    /// Main → Difficulty → HUD/Game. Also Pause, GameOver, Restart, Options.
-    /// Singleton guard prevents duplicate handlers from fighting each other.
-    /// </summary>
     public class MenuFlowController : MonoBehaviour
     {
         public static MenuFlowController Instance { get; private set; }
@@ -27,6 +21,11 @@ namespace CatchTheFruit
         [SerializeField] private FruitSpawner gameplaySpawner;
         [SerializeField] private MenuFruitRain menuRain;
         [SerializeField] private bool autoShowMainOnAwake = true;
+
+        [Header("Difficulty Assets (Inspector)")]
+        [SerializeField] private DifficultyDef easyDef;
+        [SerializeField] private DifficultyDef mediumDef;
+        [SerializeField] private DifficultyDef hardDef;
 
         private UiState _state = UiState.MainMenu;
 
@@ -49,12 +48,12 @@ namespace CatchTheFruit
         void OnEnable()
         {
             GameEvents.OnGameStart += HandleGameStart;
-            GameEvents.OnGameOver  += HandleGameOver;
+            GameEvents.OnGameOver += HandleGameOver;
         }
         void OnDisable()
         {
             GameEvents.OnGameStart -= HandleGameStart;
-            GameEvents.OnGameOver  -= HandleGameOver;
+            GameEvents.OnGameOver -= HandleGameOver;
         }
 
         // ===== Game lifecycle =====
@@ -93,9 +92,22 @@ namespace CatchTheFruit
 
         public void OnStartPressed() => ApplyState(UiState.Difficulty);
 
-        public void OnPickEasy()   { DifficultyManager.PickEasy();   GameEvents.RaiseGameStart(); }
-        public void OnPickMedium() { DifficultyManager.PickMedium(); GameEvents.RaiseGameStart(); }
-        public void OnPickHard()   { DifficultyManager.PickHard();   GameEvents.RaiseGameStart(); }
+        public void OnPickEasy() { ApplyDifficultyAsset(easyDef, "Easy"); GameEvents.RaiseGameStart(); }
+        public void OnPickMedium() { ApplyDifficultyAsset(mediumDef, "Medium"); GameEvents.RaiseGameStart(); }
+        public void OnPickHard() { ApplyDifficultyAsset(hardDef, "Hard"); GameEvents.RaiseGameStart(); }
+
+        void ApplyDifficultyAsset(DifficultyDef def, string label)
+        {
+            if (def == null)
+            {
+                Debug.LogWarning($"[MenuFlow] {label} DifficultyDef not assigned; applying safe defaults.");
+                DifficultyManager.ApplyFromDef(null);
+            }
+            else
+            {
+                DifficultyManager.ApplyFromDef(def);
+            }
+        }
 
         // ===== GameOver flow =====
 
@@ -109,7 +121,7 @@ namespace CatchTheFruit
             if (gameplaySpawner) gameplaySpawner.StopAndClear();
 
             ApplyState(UiState.Difficulty, ensureTimeScale: true);
-            AudioHub.I?.PlayButton();
+            AudioManager.I?.PlayUIButton();
         }
 
         public void OnBackToMenu()
@@ -131,6 +143,7 @@ namespace CatchTheFruit
         {
             PauseManager.Instance?.Pause();
             ApplyState(UiState.Pause);
+            OptionManager.SyncUIFromAudio(); // ensure pause toggles match current state
         }
 
         public void OnResume()
@@ -157,11 +170,13 @@ namespace CatchTheFruit
         {
             PauseManager.Instance?.ResumeForce();
             ApplyState(UiState.Options);
+            OptionManager.SyncUIFromAudio(); // ensure options toggles match current state
         }
 
         public void OnOptionsFromPause()
         {
             ApplyState(UiState.Options);
+            OptionManager.SyncUIFromAudio(); // ensure options toggles match current state
         }
 
         public void OnOptionsClose()
@@ -169,6 +184,7 @@ namespace CatchTheFruit
             if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
             {
                 ApplyState(UiState.Pause);
+                OptionManager.SyncUIFromAudio();
                 PauseManager.Instance.Pause();
             }
             else
@@ -192,12 +208,12 @@ namespace CatchTheFruit
 
             switch (target)
             {
-                case UiState.MainMenu:   SafeSetActive(mainMenuPanel, true);   break;
+                case UiState.MainMenu: SafeSetActive(mainMenuPanel, true); break;
                 case UiState.Difficulty: SafeSetActive(difficultyPanel, true); break;
-                case UiState.Hud:        SafeSetActive(hudPanel, true);        break;
-                case UiState.Pause:      SafeSetActive(pausePanel, true);      break;
-                case UiState.GameOver:   SafeSetActive(gameOverPanel, true);   break;
-                case UiState.Options:    SafeSetActive(optionsPanel, true);    break;
+                case UiState.Hud: SafeSetActive(hudPanel, true); break;
+                case UiState.Pause: SafeSetActive(pausePanel, true); break;
+                case UiState.GameOver: SafeSetActive(gameOverPanel, true); break;
+                case UiState.Options: SafeSetActive(optionsPanel, true); break;
             }
             _state = target;
         }
@@ -210,7 +226,7 @@ namespace CatchTheFruit
 #pragma warning disable 618
             return Object.FindObjectOfType<T>(includeInactive);
 #pragma warning restore 618
-#endif
+#endif 
         }
 
         void SafeSetActive(GameObject go, bool on)
