@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using static CatchTheFruit.PowerupDef;
 
@@ -7,36 +6,29 @@ namespace CatchTheFruit
 {
     /// <summary>
     /// Central power-up controller.
-    /// - Freeze scales Physics2D.gravity (not Time.timeScale) so input/UI stay responsive.
-    /// - Score Multiplier, Magnet, Shield, Clear Screen.
-    /// - Raises GameEvents for UI/VFX/Audio.
+    /// - Uses unscaled time (pause-aware).
+    /// - Avoids GC at runtime by caching event payload ScriptableObjects.
     /// </summary>
     public class PowerupManager : MonoBehaviour
     {
         public static PowerupManager Instance { get; private set; }
 
-        // ==== Public state used by other systems ====
+        // ===== Public state used by other systems =====
         public static bool FreezeActive { get; private set; }
-
-        // Compatibility for older code (e.g., Fruit.cs) that reads FreezeSpeedMul.
-        // When not frozen, this is 1.0f; during Freeze it equals the gravity scale (e.g., 0.2f).
         public static float FreezeSpeedMul { get; private set; } = 1f;
 
-        // Magnet info read by Fruit.cs
         public static bool MagnetActive { get; private set; }
         public static float MagnetRadius { get; private set; }
         public static float MagnetPullSpeed { get; private set; }
         public static Transform PlayerTransform { get; private set; }
 
-        // Shield helpers for gameplay
         public static bool ShieldIsActive => Instance != null && Instance._shieldActive;
         public static bool ConsumeShieldIfActive() => Instance != null && Instance.TryConsumeShieldHit();
 
         [Header("Player (for Magnet)")]
-        [SerializeField] private Transform player; // auto-find by Tag=Player if null
+        [SerializeField] private Transform player;
 
         [Header("Freeze (GravityScale)")]
-        [Tooltip("Gravity multiplier during Freeze (e.g., 0.2 = 20% of normal fall speed).")]
         [SerializeField, Range(0.01f, 1f)] private float freezeScale = 0.20f;
         [SerializeField, Min(0.1f)] private float freezeDuration = 2.5f;
 
@@ -56,13 +48,29 @@ namespace CatchTheFruit
         [Header("Debug")]
         [SerializeField] private bool verboseLogs = false;
 
-        // ==== Runtime ====
+        // ===== Runtime =====
         Coroutine _freezeCo, _multCo, _magnetCo, _shieldCo;
         bool _shieldActive;
         float _shieldEndAt = 0f;
 
         Vector2 _origGravity2D;
         bool _origGravityCaptured = false;
+
+        // ===== Cached event payloads (avoid per-event allocations) =====
+        static PowerupDef s_evtFreeze, s_evtMult, s_evtMagnet, s_evtShield, s_evtClear;
+
+        static PowerupDef Evt(PowerupKind k)
+        {
+            switch (k)
+            {
+                case PowerupKind.TimeScale: return s_evtFreeze ??= ScriptableObject.CreateInstance<PowerupDef>();
+                case PowerupKind.ScoreMultiplier: return s_evtMult ??= ScriptableObject.CreateInstance<PowerupDef>();
+                case PowerupKind.Magnet: return s_evtMagnet ??= ScriptableObject.CreateInstance<PowerupDef>();
+                case PowerupKind.Shield: return s_evtShield ??= ScriptableObject.CreateInstance<PowerupDef>();
+                case PowerupKind.ClearScreen: return s_evtClear ??= ScriptableObject.CreateInstance<PowerupDef>();
+            }
+            return null;
+        }
 
         void Awake()
         {
@@ -77,6 +85,13 @@ namespace CatchTheFruit
 
             _origGravity2D = Physics2D.gravity;
             _origGravityCaptured = true;
+
+            // Initialize cached payload kinds (explicit statements to avoid CS0201)
+            var eFreeze = Evt(PowerupKind.TimeScale); eFreeze.kind = PowerupKind.TimeScale;
+            var eMult = Evt(PowerupKind.ScoreMultiplier); eMult.kind = PowerupKind.ScoreMultiplier;
+            var eMag = Evt(PowerupKind.Magnet); eMag.kind = PowerupKind.Magnet;
+            var eShield = Evt(PowerupKind.Shield); eShield.kind = PowerupKind.Shield;
+            var eClear = Evt(PowerupKind.ClearScreen); eClear.kind = PowerupKind.ClearScreen;
         }
 
         void OnEnable()
@@ -93,34 +108,31 @@ namespace CatchTheFruit
             GameEvents.OnGameOver -= OnOver;
 
             EndAllEffectsImmediate();
-
             if (Instance == this) Instance = null;
         }
 
         void Update()
         {
             if (_shieldActive && _shieldEndAt > 0f && Time.unscaledTime >= _shieldEndAt)
-                EndShield(); // timeout end
+                EndShield();
         }
 
-        // ----- Events -----
+        // ===== Event handlers =====
         void OnStart()
         {
             EndAllEffectsImmediate();
             PlayerTransform = player ? player : PlayerTransform;
         }
 
-        void OnOver()
-        {
-            EndAllEffectsImmediate();
-        }
+        void OnOver() => EndAllEffectsImmediate();
 
         void OnPicked(PowerupDef def)
         {
-            if (def == null) return;
+            if (!def) return;
+
             switch (def.kind)
             {
-                case PowerupKind.TimeScale: ActivateFreeze(); break; // legacy name
+                case PowerupKind.TimeScale: ActivateFreeze(); break;
                 case PowerupKind.ScoreMultiplier: ActivateScoreMultiplier(); break;
                 case PowerupKind.Magnet: ActivateMagnet(); break;
                 case PowerupKind.Shield: ActivateShield(); break;
@@ -128,7 +140,7 @@ namespace CatchTheFruit
             }
         }
 
-        // ===== Freeze (scale Physics2D.gravity) =====
+        // ===== Freeze =====
         public void ActivateFreeze()
         {
             if (_freezeCo != null) StopCoroutine(_freezeCo);
@@ -143,10 +155,9 @@ namespace CatchTheFruit
             if (!_origGravityCaptured) { _origGravity2D = Physics2D.gravity; _origGravityCaptured = true; }
 
             FreezeActive = true;
-            FreezeSpeedMul = gMul;  // compatibility for existing code
+            FreezeSpeedMul = gMul;
 
-            var defStart = ScriptableObject.CreateInstance<PowerupDef>(); defStart.kind = PowerupKind.TimeScale;
-            GameEvents.RaisePowerupStarted(defStart);
+            GameEvents.RaisePowerupStarted(Evt(PowerupKind.TimeScale));
             AudioManager.Instance?.PlayPowerupStart(PowerupKind.TimeScale);
 
             Physics2D.gravity = _origGravity2D * gMul;
@@ -157,14 +168,13 @@ namespace CatchTheFruit
             {
                 if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
                 { yield return null; continue; }
+
                 t += Time.unscaledDeltaTime;
                 yield return null;
             }
 
             RestoreGravityIfNeeded();
-
-            var defEnd = ScriptableObject.CreateInstance<PowerupDef>(); defEnd.kind = PowerupKind.TimeScale;
-            GameEvents.RaisePowerupEnded(defEnd);
+            GameEvents.RaisePowerupEnded(Evt(PowerupKind.TimeScale));
 
             FreezeActive = false;
             FreezeSpeedMul = 1f;
@@ -175,7 +185,7 @@ namespace CatchTheFruit
         {
             if (!_origGravityCaptured) return;
             Physics2D.gravity = _origGravity2D;
-            FreezeSpeedMul = 1f; // keep the compat property accurate
+            FreezeSpeedMul = 1f;
             if (verboseLogs) Debug.Log("[Freeze] Gravity restored.");
         }
 
@@ -190,10 +200,10 @@ namespace CatchTheFruit
         {
             float dur = Mathf.Max(0.1f, scoreMultDuration);
 
-            var defStart = ScriptableObject.CreateInstance<PowerupDef>();
-            defStart.kind = PowerupKind.ScoreMultiplier;
-            defStart.scoreMultiplier = scoreMultiplier;
-            GameEvents.RaisePowerupStarted(defStart);
+            var evt = Evt(PowerupKind.ScoreMultiplier);
+            evt.scoreMultiplier = Mathf.Max(1f, scoreMultiplier);
+
+            GameEvents.RaisePowerupStarted(evt);
             AudioManager.Instance?.PlayPowerupStart(PowerupKind.ScoreMultiplier);
 
             float t = 0f;
@@ -201,14 +211,12 @@ namespace CatchTheFruit
             {
                 if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
                 { yield return null; continue; }
+
                 t += Time.unscaledDeltaTime;
                 yield return null;
             }
 
-            var defEnd = ScriptableObject.CreateInstance<PowerupDef>();
-            defEnd.kind = PowerupKind.ScoreMultiplier;
-            GameEvents.RaisePowerupEnded(defEnd);
-
+            GameEvents.RaisePowerupEnded(Evt(PowerupKind.ScoreMultiplier));
             _multCo = null;
         }
 
@@ -225,8 +233,7 @@ namespace CatchTheFruit
             MagnetPullSpeed = Mathf.Max(0.1f, magnetPullSpeed);
             PlayerTransform = player ? player : PlayerTransform;
 
-            var defStart = ScriptableObject.CreateInstance<PowerupDef>(); defStart.kind = PowerupKind.Magnet;
-            GameEvents.RaisePowerupStarted(defStart);
+            GameEvents.RaisePowerupStarted(Evt(PowerupKind.Magnet));
             AudioManager.Instance?.PlayPowerupStart(PowerupKind.Magnet);
 
             MagnetActive = true;
@@ -237,14 +244,13 @@ namespace CatchTheFruit
             {
                 if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
                 { yield return null; continue; }
+
                 t += Time.unscaledDeltaTime;
                 yield return null;
             }
 
             MagnetActive = false;
-
-            var defEnd = ScriptableObject.CreateInstance<PowerupDef>(); defEnd.kind = PowerupKind.Magnet;
-            GameEvents.RaisePowerupEnded(defEnd);
+            GameEvents.RaisePowerupEnded(Evt(PowerupKind.Magnet));
             _magnetCo = null;
         }
 
@@ -262,56 +268,46 @@ namespace CatchTheFruit
             _shieldActive = true;
             _shieldEndAt = (dur > 0f) ? Time.unscaledTime + dur : 0f;
 
-            var defStart = ScriptableObject.CreateInstance<PowerupDef>(); defStart.kind = PowerupKind.Shield;
-            GameEvents.RaisePowerupStarted(defStart);
+            GameEvents.RaisePowerupStarted(Evt(PowerupKind.Shield));
             AudioManager.Instance?.PlayPowerupStart(PowerupKind.Shield);
 
-            if (verboseLogs) Debug.Log(dur > 0f ? $"[Shield] ON for {dur:0.##}s" : "[Shield] ON (until consumed)");
+            if (verboseLogs)
+                Debug.Log(dur > 0f ? $"[Shield] ON for {dur:0.##}s" : "[Shield] ON (until consumed)");
 
-            // Wait until consumed by hit (EndShield called) or time runs out
+            // If duration == 0 → wait until consumed; if > 0, Update() will time it out.
             while (_shieldActive && _shieldEndAt == 0f)
                 yield return null;
 
             _shieldCo = null;
         }
 
-        /// <summary>
-        /// Called by gameplay (e.g., BasketCatchZone) when a bomb would hit the player.
-        /// If shield is active, consume it and play the break SFX immediately.
-        /// </summary>
         public bool TryConsumeShieldHit()
         {
             if (!_shieldActive) return false;
-
-            // Play the break sound at the exact moment of impact
             AudioManager.Instance?.PlayShieldBreak();
-
-            EndShield(); // ends visuals/state
+            EndShield();
             return true;
         }
 
         void EndShield()
         {
             if (!_shieldActive) return;
-
             _shieldActive = false;
             _shieldEndAt = 0f;
-
-            var defEnd = ScriptableObject.CreateInstance<PowerupDef>(); defEnd.kind = PowerupKind.Shield;
-            GameEvents.RaisePowerupEnded(defEnd);
+            GameEvents.RaisePowerupEnded(Evt(PowerupKind.Shield));
         }
 
         // ===== Clear Screen =====
         void DoClearScreen()
         {
-            var defStart = ScriptableObject.CreateInstance<PowerupDef>(); defStart.kind = PowerupKind.ClearScreen;
-            GameEvents.RaisePowerupStarted(defStart);
+            GameEvents.RaisePowerupStarted(Evt(PowerupKind.ClearScreen));
             AudioManager.Instance?.PlayPowerupStart(PowerupKind.ClearScreen);
 
             int sum = 0;
+
             if (Fruit.Active.Count > 0)
             {
-                var list = new List<Fruit>(Fruit.Active);
+                var list = new System.Collections.Generic.List<Fruit>(Fruit.Active);
                 for (int i = 0; i < list.Count; i++)
                 {
                     var f = list[i];
@@ -333,12 +329,10 @@ namespace CatchTheFruit
             }
 
             if (sum > 0) ScoreManager.Instance?.AddBulkPoints(sum);
-
-            var defEnd = ScriptableObject.CreateInstance<PowerupDef>(); defEnd.kind = PowerupKind.ClearScreen;
-            GameEvents.RaisePowerupEnded(defEnd);
+            GameEvents.RaisePowerupEnded(Evt(PowerupKind.ClearScreen));
         }
 
-        // ===== Utilities =====
+        // ===== Teardown =====
         void EndAllEffectsImmediate()
         {
             if (_freezeCo != null) { StopCoroutine(_freezeCo); _freezeCo = null; }
@@ -349,8 +343,7 @@ namespace CatchTheFruit
             if (FreezeActive)
             {
                 RestoreGravityIfNeeded();
-                var def = ScriptableObject.CreateInstance<PowerupDef>(); def.kind = PowerupKind.TimeScale;
-                GameEvents.RaisePowerupEnded(def);
+                GameEvents.RaisePowerupEnded(Evt(PowerupKind.TimeScale));
                 FreezeActive = false;
                 FreezeSpeedMul = 1f;
             }
@@ -361,8 +354,7 @@ namespace CatchTheFruit
             {
                 _shieldActive = false;
                 _shieldEndAt = 0f;
-                var def = ScriptableObject.CreateInstance<PowerupDef>(); def.kind = PowerupKind.Shield;
-                GameEvents.RaisePowerupEnded(def);
+                GameEvents.RaisePowerupEnded(Evt(PowerupKind.Shield));
             }
         }
     }

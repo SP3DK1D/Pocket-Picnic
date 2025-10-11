@@ -30,7 +30,7 @@ MonoBehaviour:
   - data: {fileID: 11400000, guid: e501cfd49fb878344a9123227f57a1fe, type: 2}
     weight: 0.3
   - data: {fileID: 11400000, guid: e4542cc3fcf20b240ae8c23463d0b0fb, type: 2}
-    weight: 0.3
+    weight: 0.2
   initialInterval: 1
   minInterval: 0.35
   intervalDecay: 0.80947864

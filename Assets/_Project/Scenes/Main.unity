@@ -395,8 +395,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1297348241}
+  m_Children: []
   m_Father: {fileID: 55508350}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &86012735
@@ -1394,13 +1393,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uiCanvas: {fileID: 1238025695}
-  screenBurstPrefab: {fileID: 5612169324494941279, guid: 2894131cc11fad247875cd97a86a6d31, type: 3}
-  screenBurstColor: {r: 1, g: 0.9, b: 0.3, a: 0.9}
+  screenBurstPrefab: {fileID: 5860950468551523983, guid: 6a66551e5a7f7614e8d5defb7c49b935, type: 3}
+  screenBurstColor: {r: 1, g: 0.92, b: 0.35, a: 0.95}
   screenBurstDuration: 0.35
-  screenBurstScale: 3
-  bombExplosionPrefab: {fileID: 6401756534905983915, guid: 2894131cc11fad247875cd97a86a6d31, type: 3}
+  screenBurstScale: 12
+  burstPoolSize: 6
+  bombExplosionPrefab: {fileID: 0}
   bombFxLifetime: 1
-  shieldFieldPrefab: {fileID: 216966297754257677, guid: f98635ee629d1034c8a041f1b6ba157f, type: 3}
+  bombPoolSize: 8
+  shieldFieldPrefab: {fileID: 357997698736853650, guid: bbc64afc0991827479d8b267278c148c, type: 3}
   shieldAlpha: 0.35
   shieldFade: 0.12
 --- !u!1 &370731558
@@ -3507,7 +3508,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 4606908045521496030, guid: 0d2624da8d780954e940b067fa0bf32b, type: 3}
+  m_Sprite: {fileID: 4606908045521496030, guid: d97a48e27218f2f4cab2708ea4212c8b, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -4358,7 +4359,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 4606908045521496030, guid: 0d2624da8d780954e940b067fa0bf32b, type: 3}
+  m_Sprite: {fileID: 4606908045521496030, guid: d97a48e27218f2f4cab2708ea4212c8b, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -4847,7 +4848,7 @@ MonoBehaviour:
   magnetRadius: 5.5
   magnetPullSpeed: 12
   magnetDuration: 7
-  shieldDuration: 0
+  shieldDuration: 10
   verboseLogs: 0
 --- !u!4 &1193781778
 Transform:
@@ -5676,50 +5677,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1291532157}
   m_CullTransparentMesh: 1
---- !u!1 &1297348240
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1297348241}
-  - component: {fileID: 1297348242}
-  m_Layer: 4
-  m_Name: AudioListeners
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1297348241
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1297348240}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 86012734}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1297348242
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1297348240}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab0e2844f96020b49afe6873385bf172, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1360493343
 GameObject:
   m_ObjectHideFlags: 0
@@ -5798,8 +5755,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8decc25660e86b46ab19a8aa7f8ef35, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fullHeart: {fileID: 4606908045521496030, guid: 0d2624da8d780954e940b067fa0bf32b, type: 3}
-  emptyHeart: {fileID: 2658041314872431446, guid: 2fa1dbc80dfbf9446918d9eee69a8b3f, type: 3}
+  fullHeart: {fileID: 4606908045521496030, guid: d97a48e27218f2f4cab2708ea4212c8b, type: 3}
+  emptyHeart: {fileID: 2658041314872431446, guid: 1a3a6466a871aac489124ef57970905c, type: 3}
   heartsParent: {fileID: 1360493344}
 --- !u!1 &1374378213
 GameObject:
@@ -6841,9 +6798,9 @@ MonoBehaviour:
   fruitPrefab: {fileID: 1795009156983806590, guid: 8dfe780f112f91840bb3836a49df9fdd, type: 3}
   prewarmCount: 24
   poolRoot: {fileID: 0}
-  initialInterval: 0.9
-  minInterval: 0.35
-  intervalDecay: 0.985
+  fallbackInitialInterval: 1.1
+  fallbackMinInterval: 0.44
+  fallbackIntervalDecay: 0.985
   noBurstMinGap: 0.28
   maxAlive: 14
   verboseLogs: 0
@@ -7739,7 +7696,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 4606908045521496030, guid: 0d2624da8d780954e940b067fa0bf32b, type: 3}
+  m_Sprite: {fileID: 4606908045521496030, guid: d97a48e27218f2f4cab2708ea4212c8b, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1

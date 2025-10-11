@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿// Assets/_Project/Scripts/Gameplay/Fruit.cs
+using UnityEngine;
 using System.Collections.Generic;
 using URandom = UnityEngine.Random;
 
@@ -41,8 +42,34 @@ namespace CatchTheFruit
         public bool IsCatchable => !decorative && (!IsBomb);
         public Vector2 Position2D => transform.position;
 
-        void OnEnable() { Active.Add(this); _offscreenTimer = 0f; }
-        void OnDisable() { Active.Remove(this); }
+        // ---------- Camera cache (shared across all fruits) ----------
+        // We refresh at most once per frame to avoid hammering Camera.main.
+        static Camera s_Cam;
+        static int s_CamCachedFrame = -1;
+
+        static Camera Cam
+        {
+            get
+            {
+                int f = Time.frameCount;
+                if (s_Cam == null || s_CamCachedFrame != f)
+                {
+                    s_Cam = Camera.main;     // may be null in menu/editor transitions; handled below
+                    s_CamCachedFrame = f;
+                }
+                return s_Cam;
+            }
+        }
+
+        void OnEnable()
+        {
+            Active.Add(this);
+            _offscreenTimer = 0f;
+        }
+        void OnDisable()
+        {
+            Active.Remove(this);
+        }
 
         public void Init(FruitData fd, float speedMultiplier, float groundY) =>
             Init(fd, speedMultiplier, groundY, false);
@@ -120,7 +147,7 @@ namespace CatchTheFruit
         {
             if (decorative) return;
 
-            // Compute safe kill Y
+            // Compute safe kill Y once per frame using cached camera
             float killY = ComputeKillYSafe();
 
             // Visible? Reset grace timer; otherwise accumulate
@@ -139,8 +166,9 @@ namespace CatchTheFruit
 
         float ComputeKillYSafe()
         {
+            var cam = Cam;
             float camBottom = float.NegativeInfinity;
-            var cam = Camera.main;
+
             if (cam && cam.orthographic)
             {
                 camBottom = cam.transform.position.y - cam.orthographicSize;
@@ -164,11 +192,12 @@ namespace CatchTheFruit
 
         bool IsVisibleByCamera()
         {
-            // Cheap visibility test via renderer, falls back to viewport check if needed
+            // Fast path via renderer
             if (_sr && _sr.isVisible) return true;
 
-            var cam = Camera.main;
-            if (!cam) return true; // assume visible if no camera context
+            var cam = Cam;
+            if (!cam) return true; // assume visible if no camera context (safer in transitions)
+
             Vector3 vp = cam.WorldToViewportPoint(transform.position);
             return vp.z > 0f && vp.x > -0.05f && vp.x < 1.05f && vp.y > -0.05f && vp.y < 1.05f;
         }
@@ -217,8 +246,7 @@ namespace CatchTheFruit
 #if UNITY_EDITOR
         void OnDrawGizmosSelected()
         {
-            // Visualize the computed kill Y to help tune margins
-            var cam = Camera.main;
+            var cam = Cam;
             if (!cam || !cam.orthographic) return;
             float y = ComputeKillYSafe();
             Gizmos.color = new Color(1f, 0.2f, 0.2f, 0.6f);
